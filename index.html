@@ -428,7 +428,7 @@
 
                         <!-- COLUNA DIREITA -->
                         <div class="col-md-7 agendamentos-column">
-                            <!-- LISTA DE AGENDAMENTOS -->
+                            <!-- LISTA DE AGENDAMENTOS (restaurada com campo de filtro) -->
 <div class="card mb-3">
     <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
         <span>Agendamentos</span>
@@ -436,10 +436,19 @@
             <i class="bi bi-funnel"></i> Filtrar
         </button>
     </div>
-    <div class="card-body" id="agendamentos-list">
-        <!-- Lista dinâmica de agendamentos -->
+
+    <div class="card-body">
+        <!-- Campo de filtro (mantido / necessário para o script existir) -->
+        <div class="mb-3">
+            <label for="filter-date" class="form-label">Filtrar por Data:</label>
+            <input type="date" class="form-control" id="filter-date">
+        </div>
+
+        <!-- Container onde os agendamentos são renderizados -->
+        <div id="agendamentos-container"></div>
     </div>
 </div>
+
 
 
                             <!-- LISTA DE RESERVAS -->
