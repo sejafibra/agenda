@@ -1185,7 +1185,6 @@ function deleteBlockedDay(e) {
         .catch(err => showAlert('Erro ao desbloquear dia: ' + err.message, 'danger'));
 }
 
-/* ---------- Copiar, editar, excluir agendamento ---------- */
 function copyAgendamentoToClipboard(e) {
     const id = e.target.getAttribute('data-id');
     database.ref('agendamentos/' + id).once('value')
@@ -1195,21 +1194,20 @@ function copyAgendamentoToClipboard(e) {
                 agendamento.data || '',
                 '',
                 agendamento.cliente || '',
-                agendamento.tipo === 'agendamento' ? (agendamento.endereco || '') : 'RESERVA',
-                agendamento.tipo === 'agendamento' ? (agendamento.numero || '') : '',
-                agendamento.tipo === 'agendamento' ? (agendamento.complemento || '') : '',
-                agendamento.tipo === 'agendamento' ? (agendamento.bairro || '') : '',
+                agendamento.endereco || '',
+                agendamento.numero || '',
+                agendamento.complemento || '',
+                agendamento.bairro || '',
                 agendamento.periodo || '',
                 agendamento.observacoes || '',
-                agendamento.tipo === 'agendamento' ? (agendamento.loginPPPoE || '') : '',
-                agendamento.tipo === 'agendamento' ? (agendamento.senhaPPPoE || '') : '',
-                agendamento.tipo === 'agendamento' ? (agendamento.nomeWifi || '') : '',
-                agendamento.tipo === 'agendamento' ? (agendamento.senhaWifi || '') : '',
-                agendamento.tipo === 'agendamento' ? (agendamento.roteador ? 'Sim' : 'Não') : ''
+                agendamento.loginPPPoE || '',
+                agendamento.senhaPPPoE || '',
+                agendamento.nomeWifi || '',
+                agendamento.senhaWifi || ''
             ].join('\t');
             return navigator.clipboard.writeText(textToCopy);
         })
-        .then(()=> showAlert('Dados copiados para a área de transferência!', 'success'))
+        .then(() => showAlert('Dados copiados para a área de transferência!', 'success'))
         .catch(err => showAlert('Erro ao copiar dados: ' + (err.message || err), 'danger'));
 }
 
