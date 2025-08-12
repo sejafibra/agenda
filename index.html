@@ -1185,32 +1185,33 @@ function deleteBlockedDay(e) {
         .catch(err => showAlert('Erro ao desbloquear dia: ' + err.message, 'danger'));
 }
 
-function copyAgendamentoToClipboard(e) {
-    const id = e.target.getAttribute('data-id');
-    database.ref('agendamentos/' + id).once('value')
-        .then(snapshot => {
-            const agendamento = snapshot.val();
-            const textToCopy = [
-                agendamento.data || '',
-                '',
-                agendamento.cliente || '',
-                agendamento.endereco || '',
-                agendamento.numero || '',
-                agendamento.complemento || '',
-                agendamento.bairro || '',
-                agendamento.periodo || '',
-                agendamento.observacoes || '',
-                agendamento.loginPPPoE || '',
-                agendamento.senhaPPPoE || '',
-                agendamento.nomeWifi || '',
-                agendamento.senhaWifi || ''
-            ].join('\t');
-            return navigator.clipboard.writeText(textToCopy);
-        })
-        .then(() => showAlert('Dados copiados para a área de transferência!', 'success'))
-        .catch(err => showAlert('Erro ao copiar dados: ' + (err.message || err), 'danger'));
-}
-
+// Copia agendamento para clipboard no formato para Excel
+        function copyAgendamentoToClipboard(e) {
+            const agendamentoId = e.target.getAttribute('data-id');
+            database.ref('agendamentos/' + agendamentoId).once('value')
+                .then(snapshot => {
+                    const agendamento = snapshot.val();
+                    const textToCopy = [
+                        agendamento.data,
+                        agendamento.cliente,
+                        agendamento.tipo === 'agendamento' ? agendamento.endereco : 'RESERVA',
+                        agendamento.tipo === 'agendamento' ? agendamento.numero : '',
+                        agendamento.tipo === 'agendamento' ? (agendamento.complemento || '') : '',
+                        agendamento.tipo === 'agendamento' ? agendamento.bairro : '',
+                        agendamento.periodo,
+                        agendamento.observacoes || '',
+                        agendamento.tipo === 'agendamento' ? (agendamento.loginPPPoE || '') : '',
+                        agendamento.tipo === 'agendamento' ? (agendamento.senhaPPPoE || '') : '',
+                        agendamento.tipo === 'agendamento' ? (agendamento.nomeWifi || '') : '',
+                        agendamento.tipo === 'agendamento' ? (agendamento.senhaWifi || '') : '',
+                        agendamento.tipo === 'agendamento' ? (agendamento.roteador ? 'Sim' : 'Não') : ''
+                    ].join('\t'); // Tab como separador para Excel
+                    
+                    navigator.clipboard.writeText(textToCopy)
+                        .then(() => showAlert('Dados copiados para a área de transferência!', 'success'))
+                        .catch(() => showAlert('Erro ao copiar dados.', 'danger'));
+                });
+        }
 function editAgendamento(e) {
     const agendamentoId = e.target.getAttribute('data-id');
     database.ref('agendamentos/' + agendamentoId).once('value')
