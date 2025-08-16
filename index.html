@@ -80,6 +80,18 @@
             background-color: #6c757d;
             color: white;
         }
+        .badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000 !important;
+	}
+	.text-muted.d-block {
+    display: block;
+    margin-top: 3px;
+	}
+	.badge-os {
+            background-color: #6610f2;
+            color: white;
+        }
         .copy-btn {
             cursor: pointer;
             transition: all 0.2s;
@@ -157,13 +169,13 @@
         }
         .form-column {
             flex: 0 0 auto;
-            width: 45%;
-            max-width: 45%;
+            width: 100%;
+            max-width: 100%;
         }
         .agendamentos-column {
             flex: 0 0 auto;
-            width: 50%;
-            max-width: 50%;
+            width: 100%;
+            max-width: 100%;
         }
         @media (max-width: 992px) {
             .form-column,
@@ -202,6 +214,137 @@
             font-weight: 500;
             margin-top: -8px;
             margin-bottom: 10px;
+        }
+
+        /* Menu principal */
+        .menu-principal {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .btn-menu {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #0d6efd;
+            color: white;
+            cursor: pointer;
+        }
+        .btn-menu:hover {
+            background-color: #0b5ed7;
+        }
+        .btn-menu.active {
+            background-color: #0b5ed7;
+            font-weight: bold;
+        }
+        .secao {
+            display: none;
+        }
+        .secao.active {
+            display: block;
+        }
+
+        /* Filtros */
+        .filtros-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        /* Novos estilos adicionados */
+        .bairro-negrito {
+            font-weight: bold;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .action-buttons i {
+            font-size: 0.9rem;
+        }
+        .highlighted {
+            background-color: #fc6f6f !important;
+        }
+        .highlight-checkbox {
+            margin-right: 5px;
+        }
+        
+        /* Novos estilos para os ajustes solicitados */
+        .card-body .card-text {
+            margin-bottom: 0.5rem;
+        }
+        .card-body .action-buttons {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .card-body .observacoes {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+        }
+        .form-row-expanded {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .form-row-expanded .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .form-row-expanded .form-section {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        /* Estilos específicos para o novo layout do formulário */
+        .form-three-columns {
+            display: flex;
+            gap: 20px;
+        }
+        .form-column-left, .form-column-center, .form-column-right {
+            flex: 1;
+            min-width: 0;
+        }
+        .form-field-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-field-label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-field-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-field-row .form-group {
+            flex: 1;
+        }
+        @media (max-width: 768px) {
+            .form-three-columns {
+                flex-direction: column;
+            }
+        }
+	.convert-btn {
+            color: #6c757d;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .convert-btn:hover {
+            color: #0d6efd;
+            transform: rotate(30deg);
+        }
+        .badge-reserva {
+            background-color: #6c757d !important;
+            color: white !important;
+        }
+        .card.reserva {
+            opacity: 0.9;
+            border-left: 4px solid #6c757d !important;
+        }
+        .card.reserva:hover {
+            opacity: 1;
         }
     </style>
 </head>
@@ -254,208 +397,292 @@
                 </div>
             </div>
 
-            <!-- CONTEÚDO PRINCIPAL (FORMULÁRIOS + AGENDAMENTOS) -->
-            <div class="row main-content-row">
-                <div class="col-md-11">
-                    <div class="row">
-                        <!-- COLUNA ESQUERDA (FORMULÁRIOS) -->
-                        <div class="col-md-5 form-column">
-                            <div class="card">
-                                <div class="card-header bg-primary text-white">
-                                    <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="agendamento-tab" data-bs-toggle="tab" data-bs-target="#agendamento-tab-pane" type="button" role="tab" aria-controls="agendamento-tab-pane" aria-selected="true">Agendamento</button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="reserva-tab" data-bs-toggle="tab" data-bs-target="#reserva-tab-pane" type="button" role="tab" aria-controls="reserva-tab-pane" aria-selected="false">Reserva</button>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="card-body">
-                                    <div class="tab-content" id="myTabContent">
-                                        <div class="tab-pane fade show active" id="agendamento-tab-pane" role="tabpanel" aria-labelledby="agendamento-tab" tabindex="0">
-                                            <form id="agendamento-form">
-                                                <div class="mb-3">
-                                                    <label for="data" class="form-label">Data do Agendamento</label>
-                                                    <input type="date" class="form-control" id="data" required>
-                                                    <div id="data-info" class="form-text"></div>
-                                                </div>
-                                                <div class="form-section">
-                                                    <div class="form-section-title">Informações do Cliente</div>
-                                                    <div class="mb-3">
-                                                        <label for="cliente" class="form-label">Nome do Cliente</label>
-                                                        <input type="text" class="form-control" id="cliente" required>
-                                                    </div>
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-8">
-                                                            <label for="endereco" class="form-label">Endereço</label>
-                                                            <input type="text" class="form-control" id="endereco" required>
+            <!-- MENU PRINCIPAL -->
+            <div class="menu-principal">
+                <button class="btn-menu active" data-target="cadastrar">Cadastrar</button>
+                <button class="btn-menu" data-target="agendamentos">Ver Agendamentos</button>
+                <button class="btn-menu" data-target="ordens-servico">Ordens de Serviço</button>
+                <button class="btn-menu" data-target="ajustes-supervisor">Ajustes Supervisor</button>
+            </div>
+
+            <!-- SEÇÃO CADASTRAR -->
+            <div id="cadastrar" class="secao active">
+                <div class="row main-content-row">
+                    <div class="col-md-11">
+                        <div class="row">
+                            <!-- COLUNA ESQUERDA (FORMULÁRIOS) -->
+                            <div class="col-md-12 form-column">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link active" id="agendamento-tab" data-bs-toggle="tab" data-bs-target="#agendamento-tab-pane" type="button" role="tab" aria-controls="agendamento-tab-pane" aria-selected="true">Agendamento</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link" id="reserva-tab" data-bs-toggle="tab" data-bs-target="#reserva-tab-pane" type="button" role="tab" aria-controls="reserva-tab-pane" aria-selected="false">Reserva</button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tab-content" id="myTabContent">
+                                            <div class="tab-pane fade show active" id="agendamento-tab-pane" role="tabpanel" aria-labelledby="agendamento-tab" tabindex="0">
+                                                <form id="agendamento-form">
+                                                    <div class="form-three-columns">
+                                                        <!-- Coluna da Esquerda -->
+                                                        <div class="form-column-left">
+                                                            <div class="form-field-group">
+                                                                <label class="form-field-label">Data do Agendamento</label>
+                                                                <input type="date" class="form-control" id="data" required>
+                                                                <div id="data-info" class="form-text"></div>
+                                                            </div>
+                                                            
+                                                            <div class="form-field-group">
+                                                                <label class="form-field-label">Informações do Cliente</label>
+                                                                <div class="mb-3">
+                                                                    <label for="cliente" class="form-field-label">Nome do Cliente</label>
+                                                                    <input type="text" class="form-control" id="cliente" required>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="form-field-group">
+                                                                <label class="form-field-label">Endereço</label>
+                                                                <input type="text" class="form-control" id="endereco" required>
+                                                            </div>
+                                                            
+                                                            <div class="form-field-group">
+                                                                <div class="form-field-row">
+                                                                    <div class="form-group">
+                                                                        <label for="numero" class="form-field-label">Número</label>
+                                                                        <input type="text" class="form-control" id="numero" required>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="complemento" class="form-field-label">Complemento</label>
+                                                                        <input type="text" class="form-control" id="complemento">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            <div class="form-field-group">
+                                                                <label for="bairro" class="form-field-label">Bairro</label>
+                                                                <input type="text" class="form-control" id="bairro" required>
+                                                            </div>
                                                         </div>
-                                                        <div class="col-md-4">
-                                                            <label for="numero" class="form-label">Número</label>
-                                                            <input type="text" class="form-control" id="numero" required>
+                                                        
+                                                        <!-- Coluna do Meio -->
+                                                        <div class="form-column-center">
+                                                            <div class="form-field-group">
+                                                                <label class="form-field-label">Configurações de Rede</label>
+                                                                <div class="mb-3">
+                                                                    <label for="login-pppoe" class="form-field-label">Login PPPoE</label>
+                                                                    <input type="text" class="form-control" id="login-pppoe">
+                                                                </div>
+                                                                
+                                                                <div class="mb-3">
+                                                                    <label for="senha-pppoe" class="form-field-label">Senha PPPoE</label>
+                                                                    <input type="text" class="form-control" id="senha-pppoe">
+                                                                </div>
+                                                                
+                                                                <div class="mb-3">
+                                                                    <label for="nome-wifi" class="form-field-label">Nome do Wi-Fi</label>
+                                                                    <input type="text" class="form-control" id="nome-wifi">
+                                                                </div>
+                                                                
+                                                                <div class="mb-3">
+                                                                    <label for="senha-wifi" class="form-field-label">Senha do Wi-Fi</label>
+                                                                    <input type="text" class="form-control" id="senha-wifi">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <!-- Coluna da Direita -->
+                                                        <div class="form-column-right">
+                                                            <div class="form-field-group">
+                                                                <label class="form-field-label">Detalhes da Instalação</label>
+                                                                <div class="mb-3">
+                                                                    <label for="periodo" class="form-field-label">Período da Instalação</label>
+                                                                    <select class="form-select" id="periodo" required>
+                                                                        <option value="">Selecione...</option>
+                                                                        <option value="Inicial">Inicial</option>
+                                                                        <option value="Manhã">Manhã</option>
+                                                                        <option value="Tarde">Tarde</option>
+                                                                        <option value="Horário Comercial">Horário Comercial</option>
+                                                                        <option value="Encaixe">Encaixe</option>
+                                                                    </select>
+                                                                </div>
+                                                                
+                                                                <div class="mb-3">
+                                                                    <label for="observacoes" class="form-field-label">Observações (opcional)</label>
+                                                                    <textarea class="form-control" id="observacoes" rows="2"></textarea>
+                                                                </div>
+                                                                
+                                                                <div class="mb-3 form-check">
+                                                                    <input type="checkbox" class="form-check-input" id="roteador">
+                                                                    <label class="form-check-label" for="roteador">Roteador OK</label>
+                                                                </div>
+                                                                
+                                                                <div class="mb-3 form-check">
+                                                                    <input type="checkbox" class="form-check-input" id="ordem-servico">
+                                                                    <label class="form-check-label" for="ordem-servico">Ordem de Serviço</label>
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="mb-3">
-                                                        <label for="complemento" class="form-label">Complemento (opcional)</label>
-                                                        <input type="text" class="form-control" id="complemento">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="bairro" class="form-label">Bairro</label>
-                                                        <input type="text" class="form-control" id="bairro" required>
-                                                    </div>
-                                                </div>
-                                                <div class="form-section">
-                                                    <div class="form-section-title">Detalhes da Instalação</div>
-                                                    <div class="mb-3">
-                                                        <label for="periodo" class="form-label">Período da Instalação</label>
-                                                        <select class="form-select" id="periodo" required>
-                                                            <option value="">Selecione...</option>
-                                                            <option value="Inicial">Inicial</option>
-                                                            <option value="Manhã">Manhã</option>
-                                                            <option value="Tarde">Tarde</option>
-                                                            <option value="Horário Comercial">Horário Comercial</option>
-                                                            <option value="Encaixe">Encaixe</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="observacoes" class="form-label">Observações (opcional)</label>
-                                                        <textarea class="form-control" id="observacoes" rows="2"></textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="form-section">
-                                                    <div class="form-section-title">Configurações de Rede</div>
-                                                    <div class="mb-3">
-                                                        <label for="login-pppoe" class="form-label">Login PPPoE</label>
-                                                        <input type="text" class="form-control" id="login-pppoe">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="senha-pppoe" class="form-label">Senha PPPoE</label>
-                                                        <input type="password" class="form-control" id="senha-pppoe">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="nome-wifi" class="form-label">Nome do Wi-Fi</label>
-                                                        <input type="text" class="form-control" id="nome-wifi">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="senha-wifi" class="form-label">Senha do Wi-Fi</label>
-                                                        <input type="password" class="form-control" id="senha-wifi">
-                                                    </div>
-                                                    <div class="mb-3 form-check">
-                                                        <input type="checkbox" class="form-check-input" id="roteador">
-                                                        <label class="form-check-label" for="roteador">Roteador OK</label>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" id="agendamento-id">
-                                                <button type="submit" class="btn btn-primary w-100" id="submit-btn">Agendar</button>
-                                                <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancel-edit-btn">Cancelar Edição</button>
-                                            </form>
-                                        </div>
-                                        <div class="tab-pane fade" id="reserva-tab-pane" role="tabpanel" aria-labelledby="reserva-tab" tabindex="0">
-                                            <form id="reserva-form">
-                                                <div class="mb-3">
-                                                    <label for="reserva-data" class="form-label">Data da Reserva</label>
-                                                    <input type="date" class="form-control" id="reserva-data" required>
-                                                </div>
-                                                <div class="form-section">
-                                                    <div class="form-section-title">Informações do Cliente</div>
-                                                    <div class="mb-3">
-                                                        <label for="reserva-cliente" class="form-label">Nome do Cliente</label>
-                                                        <input type="text" class="form-control" id="reserva-cliente" required>
-                                                    </div>
-                                                    <div class="row mb-3">
-                                                        <div class="col-md-8">
-                                                            <label for="reserva-endereco" class="form-label">Endereço</label>
-                                                            <input type="text" class="form-control" id="reserva-endereco" required>
+                                                    
+                                                    <input type="hidden" id="agendamento-id">
+                                                    <button type="submit" class="btn btn-primary w-100" id="submit-btn">Agendar</button>
+                                                    <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancel-edit-btn">Cancelar Edição</button>
+                                                </form>
+                                            </div>
+                                            <div class="tab-pane fade" id="reserva-tab-pane" role="tabpanel" aria-labelledby="reserva-tab" tabindex="0">
+                                                <form id="reserva-form">
+                                                    <div class="form-row-expanded">
+                                                        <div class="form-group">
+                                                            <label for="reserva-data" class="form-label">Data da Reserva</label>
+                                                            <input type="date" class="form-control" id="reserva-data" required>
                                                         </div>
-                                                        <div class="col-md-4">
-                                                            <label for="reserva-numero" class="form-label">Número</label>
-                                                            <input type="text" class="form-control" id="reserva-numero" required>
+                                                        
+                                                        <div class="form-section">
+                                                            <div class="form-section-title">Informações do Cliente</div>
+                                                            <div class="mb-3">
+                                                                <label for="reserva-cliente" class="form-label">Nome do Cliente</label>
+                                                                <input type="text" class="form-control" id="reserva-cliente" required>
+                                                            </div>
+                                                            <div class="row mb-3">
+                                                                <div class="col-md-8">
+                                                                    <label for="reserva-endereco" class="form-label">Endereço</label>
+                                                                    <input type="text" class="form-control" id="reserva-endereco" required>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label for="reserva-numero" class="form-label">Número</label>
+                                                                    <input type="text" class="form-control" id="reserva-numero" required>
+                                                                </div>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="reserva-complemento" class="form-label">Complemento </label>
+                                                                <input type="text" class="form-control" id="reserva-complemento">
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="reserva-bairro" class="form-label">Bairro</label>
+                                                                <input type="text" class="form-control" id="reserva-bairro" required>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <div class="form-section">
+                                                            <div class="form-section-title">Detalhes da Reserva</div>
+                                                            <div class="mb-3">
+                                                                <label for="reserva-periodo" class="form-label">Período</label>
+                                                                <select class="form-select" id="reserva-periodo" required>
+                                                                    <option value="">Selecione...</option>
+                                                                    <option value="Inicial">Inicial</option>
+                                                                    <option value="Manhã">Manhã</option>
+                                                                    <option value="Tarde">Tarde</option>
+                                                                    <option value="Horário Comercial">Horário Comercial</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="reserva-observacoes" class="form-label">Observações (opcional)</label>
+                                                                <textarea class="form-control" id="reserva-observacoes" rows="2"></textarea>
+                                                            </div>
                                                         </div>
                                                     </div>
-                                                    <div class="mb-3">
-                                                        <label for="reserva-complemento" class="form-label">Complemento (opcional)</label>
-                                                        <input type="text" class="form-control" id="reserva-complemento">
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="reserva-bairro" class="form-label">Bairro</label>
-                                                        <input type="text" class="form-control" id="reserva-bairro" required>
-                                                    </div>
-                                                </div>
-                                                <div class="form-section">
-                                                    <div class="form-section-title">Detalhes da Reserva</div>
-                                                    <div class="mb-3">
-                                                        <label for="reserva-periodo" class="form-label">Período</label>
-                                                        <select class="form-select" id="reserva-periodo" required>
-                                                            <option value="">Selecione...</option>
-                                                            <option value="Inicial">Inicial</option>
-                                                            <option value="Manhã">Manhã</option>
-                                                            <option value="Tarde">Tarde</option>
-                                                            <option value="Horário Comercial">Horário Comercial</option>
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label for="reserva-observacoes" class="form-label">Observações (opcional)</label>
-                                                        <textarea class="form-control" id="reserva-observacoes" rows="2"></textarea>
-                                                    </div>
-                                                </div>
-                                                <input type="hidden" id="reserva-id">
-                                                <button type="submit" class="btn btn-secondary w-100" id="submit-reserva-btn">Reservar</button>
-                                                <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancel-reserva-edit-btn">Cancelar Edição</button>
-                                            </form>
+                                                    <input type="hidden" id="reserva-id">
+                                                    <button type="submit" class="btn btn-secondary w-100" id="submit-reserva-btn">Reservar</button>
+                                                    <button type="button" class="btn btn-secondary w-100 mt-2 d-none" id="cancel-reserva-edit-btn">Cancelar Edição</button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                            <!-- BLOQUEIO DE DIAS -->
-                            <div class="card mt-3">
-                                <div class="card-header bg-danger text-white">
-                                    Bloquear Dia
-                                </div>
-                                <div class="card-body">
-                                    <form id="bloqueio-form">
-                                        <div class="mb-3">
-                                            <label for="bloqueio-data" class="form-label">Data</label>
-                                            <input type="date" class="form-control" id="bloqueio-data" required>
-                                        </div>
-                                        <button type="submit" class="btn btn-danger w-100">Bloquear</button>
-                                    </form>
-                                    <div id="dias-bloqueados" class="mt-3"></div>
-                                </div>
+            <!-- SEÇÃO AGENDAMENTOS -->
+            <div id="agendamentos" class="secao">
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <span>Todos os Agendamentos</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="filtros-container">
+                            <div>
+                                <label for="filter-date" class="form-label">Filtrar por Data:</label>
+                                <input type="date" class="form-control" id="filter-date">
+                            </div>
+                            <div>
+                                <label for="filter-roteador" class="form-label">Roteador:</label>
+                                <select class="form-select" id="filter-roteador">
+                                    <option value="todos">Todos</option>
+                                    <option value="ok">Roteador OK</option>
+                                    <option value="pendente">Roteador Pendente</option>
+                                </select>
                             </div>
                         </div>
+                        <div id="agendamentos-container"></div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- COLUNA DIREITA -->
-                        <div class="col-md-7 agendamentos-column">
-                            <!-- LISTA DE AGENDAMENTOS (restaurada com campo de filtro) -->
-<div class="card mb-3">
-    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-        <span>Agendamentos</span>
-        </div>
-
-    <div class="card-body">
-        <!-- Campo de filtro (mantido / necessário para o script existir) -->
-        <div class="mb-3">
-            <label for="filter-date" class="form-label">Filtrar por Data:</label>
-            <input type="date" class="form-control" id="filter-date">
-        </div>
-
-        <!-- Container onde os agendamentos são renderizados -->
-        <div id="agendamentos-container"></div>
-    </div>
-</div>
-
-
-
-                            <!-- LISTA DE RESERVAS -->
-                            <div class="card">
-                                <div class="card-header bg-secondary text-white">
-                                    Reservas
-                                </div>
-                                <div class="card-body" id="reservas-list">
-                                    <!-- Lista dinâmica de reservas -->
-                                </div>
+            <!-- SEÇÃO ORDENS DE SERVIÇO -->
+            <div id="ordens-servico" class="secao">
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <span>Ordens de Serviço</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="filtros-container">
+                            <div>
+                                <label for="filter-date-os" class="form-label">Filtrar por Data:</label>
+                                <input type="date" class="form-control" id="filter-date-os">
+                            </div>
+                        </div>
+                        <div id="ordens-servico-container"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SEÇÃO AJUSTES SUPERVISOR -->
+            <div id="ajustes-supervisor" class="secao">
+                <div class="row">
+                    <div class="col-md-6">
+                        <!-- BLOQUEIO DE DIAS -->
+                        <div class="card">
+                            <div class="card-header bg-danger text-white">
+                                Bloquear Dia
+                            </div>
+                            <div class="card-body">
+                                <form id="bloqueio-form">
+                                    <div class="mb-3">
+                                        <label for="bloqueio-data" class="form-label">Data</label>
+                                        <input type="date" class="form-control" id="bloqueio-data" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-danger w-100">Bloquear</button>
+                                </form>
+                                <div id="dias-bloqueados" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <!-- AJUSTE DE VAGAS -->
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                Ajustar Vagas por Dia
+                            </div>
+                            <div class="card-body">
+                                <form id="ajuste-vagas-form">
+                                    <div class="mb-3">
+                                        <label for="ajuste-vagas-data" class="form-label">Data</label>
+                                        <input type="date" class="form-control" id="ajuste-vagas-data" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="ajuste-vagas-quantidade" class="form-label">Quantidade de Vagas</label>
+                                        <input type="number" class="form-control" id="ajuste-vagas-quantidade" min="1" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-warning w-100">Ajustar Vagas</button>
+                                </form>
+                                <div id="dias-ajustados" class="mt-3"></div>
                             </div>
                         </div>
                     </div>
@@ -482,6 +709,29 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL PARA ALTERAR DATA -->
+    <div class="modal fade" id="changeDateModal" tabindex="-1" aria-labelledby="changeDateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="changeDateModalLabel">Alterar Data do Agendamento</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="new-date" class="form-label">Nova Data</label>
+                        <input type="date" class="form-control" id="new-date" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmChangeDateBtn">Alterar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 <!-- SCRIPTS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
@@ -495,6 +745,8 @@
   - Autenticação (compat)
   - Carregamento / CRUD de agendamentos
   - Bloqueio de dias
+  - Ajuste de vagas por dia
+  - Separação de Ordens de Serviço
   - Função calcularProximasVagas() (sáb = 1, semana = 3)
   - Reaproveitamento da lógica original sempre que possível
 */
@@ -505,7 +757,7 @@ const firebaseConfigs = {
         apiKey: "AIzaSyArt1k0NSeuHD9qjEHbC9zJNEr331_Zk0A",
         authDomain: "agendains.firebaseapp.com",
         projectId: "agendains",
-        storageBucket: "agendains.firebasestorage.app",
+        storageBucket: "agendains.appspot.com",
         messagingSenderId: "1060898205140",
         appId: "1:1060898205140:web:994bd3b9e9e5677168ba41",
         databaseURL: "https://agendains-default-rtdb.firebaseio.com/"
@@ -514,13 +766,12 @@ const firebaseConfigs = {
         apiKey: "AIzaSyBvZSNPpRzvMs__huKkb8GgDaDjq-fxzyI",
         authDomain: "agendacaragua-4af6c.firebaseapp.com",
         projectId: "agendacaragua-4af6c",
-        storageBucket: "agendacaragua-4af6c.firebasestorage.app",
+        storageBucket: "agendacaragua-4af6c.appspot.com",
         messagingSenderId: "29707363548",
         appId: "1:29707363548:web:57b6387921834623cf8019",
         databaseURL: "https://agendacaragua-4af6c-default-rtdb.firebaseio.com/"
     }
 };
-
 let currentCity = 'ubatuba';
 let firebaseApp = null;
 let database = null;
@@ -561,6 +812,7 @@ initFirebase(currentCity);
 let currentUser = null;
 let editingAgendamentoId = null;
 let currentExtraAgendamento = null;
+let diasAjustados = {};
 
 /* ---------- Lista de e-mails autorizados (mantida) ---------- */
 const AUTHORIZED_EMAILS = [
@@ -647,6 +899,32 @@ function showAlert(message, type) {
     }, 5000);
 }
 
+/* ---------- Menu Navigation ---------- */
+function setupMenuNavigation() {
+    document.querySelectorAll('.btn-menu').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons and sections
+            document.querySelectorAll('.btn-menu').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.secao').forEach(s => s.classList.remove('active'));
+            
+            // Add active class to clicked button and corresponding section
+            this.classList.add('active');
+            const target = this.getAttribute('data-target');
+            document.getElementById(target).classList.add('active');
+            
+            // Load data if needed
+            if (target === 'agendamentos') {
+                loadAgendamentos();
+            } else if (target === 'ordens-servico') {
+                loadOrdensServico();
+            } else if (target === 'ajustes-supervisor') {
+                loadBlockedDays();
+                loadDiasAjustados();
+            }
+        });
+    });
+}
+
 /* ---------- Autenticação e controle de acesso ---------- */
 function checkAuthorization(email) {
     return AUTHORIZED_EMAILS.includes(email.toLowerCase());
@@ -660,6 +938,7 @@ function initAuth() {
             updateUIForUser(user);
             loadAgendamentos();
             loadBlockedDays();
+            loadDiasAjustados();
         } else {
             showLoginScreen();
             if (user) auth.signOut();
@@ -711,6 +990,14 @@ function setupEventListeners() {
     const filterDate = document.getElementById('filter-date');
     if (filterDate) filterDate.addEventListener('change', filterAgendamentosByDate);
 
+    // filtro data OS
+    const filterDateOS = document.getElementById('filter-date-os');
+    if (filterDateOS) filterDateOS.addEventListener('change', filterOrdensServicoByDate);
+
+    // filtro roteador
+    const filterRoteador = document.getElementById('filter-roteador');
+    if (filterRoteador) filterRoteador.addEventListener('change', filterAgendamentosByRoteador);
+
     // data input change
     document.getElementById('data').addEventListener('change', function(e) {
         let dateValue = e.target.value;
@@ -732,9 +1019,8 @@ function setupEventListeners() {
         checkReservaLimit();
     });
 
-    // add blocked day button/form
-    document.getElementById('add-blocked-day')?.addEventListener('click', addBlockedDay);
-    document.getElementById('bloqueio-form')?.addEventListener('submit', function(e) {
+    // bloqueio de dia
+    document.getElementById('bloqueio-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const date = document.getElementById('bloqueio-data').value;
         if (!date) { showAlert('Preencha a data', 'danger'); return; }
@@ -744,21 +1030,53 @@ function setupEventListeners() {
             .catch(err => showAlert('Erro ao bloquear dia: ' + err.message, 'danger'));
     });
 
-    // modal extra
-    document.getElementById('confirm-extra')?.addEventListener('click', requestExtraAuthorization);
+    // ajuste de vagas
+    document.getElementById('ajuste-vagas-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const date = document.getElementById('ajuste-vagas-data').value;
+        const quantidade = document.getElementById('ajuste-vagas-quantidade').value;
+        
+        if (!date || !quantidade) {
+            showAlert('Preencha todos os campos', 'danger');
+            return;
+        }
+        
+        if (!confirm(`Deseja ajustar o dia ${formatDateCorrectly(date)} para ${quantidade} vaga(s)?`)) {
+            return;
+        }
+        
+        database.ref('diasAjustados/' + date).set({
+            vagas: parseInt(quantidade),
+            ajustadoEm: firebase.database.ServerValue.TIMESTAMP,
+            ajustadoPor: currentUser.email
+        })
+        .then(() => {
+            showAlert('Vagas ajustadas com sucesso!', 'success');
+            document.getElementById('ajuste-vagas-form').reset();
+            calcularProximasVagas();
+        })
+        .catch(err => showAlert('Erro ao ajustar vagas: ' + err.message, 'danger'));
+    });
 
     // cidade selector
-    document.getElementById('cidade-selector')?.addEventListener('change', (e) => {
+    document.getElementById('cidade-selector').addEventListener('change', (e) => {
         const selectedCity = e.target.value;
         initFirebase(selectedCity);
         // rebind listeners for auth events with new auth instance
         initAuth();
         if (auth.currentUser) {
-            loadAgendamentos();
+            loadAgendamentosProximos();
             loadBlockedDays();
+            loadDiasAjustados();
             calcularProximasVagas();
         }
     });
+
+    // menu navigation
+    setupMenuNavigation();
+
+    // confirm change date
+    document.getElementById('confirmChangeDateBtn')?.addEventListener('click', confirmChangeDate);
 }
 
 /* ---------- Login handler ---------- */
@@ -774,8 +1092,9 @@ function handleLogin(email, password) {
             currentUser = userCredential.user;
             showAppContent();
             updateUIForUser(currentUser);
-            loadAgendamentos();
+            loadAgendamentosProximos();
             loadBlockedDays();
+            loadDiasAjustados();
             calcularProximasVagas();
         })
         .catch(error => {
@@ -806,10 +1125,15 @@ function handleFormSubmit(e) {
         nomeWifi: document.getElementById('nome-wifi').value,
         senhaWifi: document.getElementById('senha-wifi').value,
         roteador: document.getElementById('roteador').checked,
-        createdAt: firebase.database.ServerValue.TIMESTAMP,
-        status: 'active',
-        tipo: 'agendamento'
+        ordemServico: document.getElementById('ordem-servico').checked,
+        updatedAt: firebase.database.ServerValue.TIMESTAMP,
+        status: 'active'
     };
+
+    // Remove o tipo 'reserva' se estiver convertendo
+    if (editingAgendamentoId) {
+    formData.tipo = null; // isso remove o campo do registro
+}
 
     if (currentUser && !currentUser.isAnonymous) {
         formData.createdBy = currentUser.email;
@@ -820,14 +1144,14 @@ function handleFormSubmit(e) {
         return;
     }
 
-    // Mantemos a lógica de cadastro já existente (limites por cadastro intactos)
     if (editingAgendamentoId) {
         database.ref('agendamentos/' + editingAgendamentoId).update(formData)
             .then(() => {
-                showAlert('Agendamento atualizado com sucesso!', 'success');
+                showAlert(editingAgendamentoId ? 'Reserva convertida em agendamento com sucesso!' : 'Agendamento atualizado com sucesso!', 'success');
                 cancelEdit();
+                loadAgendamentos();
             })
-            .catch(error => showAlert('Erro ao atualizar agendamento: ' + error.message, 'danger'));
+            .catch(error => showAlert('Erro ao salvar: ' + error.message, 'danger'));
     } else {
         database.ref('agendamentos').push(formData)
             .then(() => {
@@ -843,7 +1167,12 @@ function handleReservaSubmit(e) {
     const reservaData = {
         data: document.getElementById('reserva-data').value,
         cliente: document.getElementById('reserva-cliente').value,
+        endereco: document.getElementById('reserva-endereco').value,
+        numero: document.getElementById('reserva-numero').value,
+        complemento: document.getElementById('reserva-complemento').value,
+        bairro: document.getElementById('reserva-bairro').value,
         periodo: document.getElementById('reserva-periodo').value,
+        observacoes: document.getElementById('reserva-observacoes').value,
         createdAt: firebase.database.ServerValue.TIMESTAMP,
         status: 'active',
         tipo: 'reserva'
@@ -862,9 +1191,9 @@ function handleReservaSubmit(e) {
 }
 
 /* ---------- Load & render agendamentos ---------- */
+
 function loadAgendamentos() {
-    // Observador (on) para manter feed em tempo real
-    database.ref('agendamentos').on('value', snapshot => {
+    database.ref('agendamentos').orderByChild('ordemServico').equalTo(false).on('value', snapshot => {
         const agendamentos = [];
         snapshot.forEach(childSnapshot => {
             const ag = childSnapshot.val();
@@ -877,6 +1206,41 @@ function loadAgendamentos() {
     });
 }
 
+function loadOrdensServico() {
+    database.ref('agendamentos').orderByChild('ordemServico').equalTo(true).on('value', snapshot => {
+        const ordensServico = [];
+        snapshot.forEach(childSnapshot => {
+            const os = childSnapshot.val();
+            ordensServico.push({
+                id: childSnapshot.key,
+                ...os
+            });
+        });
+        renderOrdensServico(ordensServico);
+    });
+}
+
+function loadDiasAjustados() {
+    database.ref('diasAjustados').on('value', snapshot => {
+        diasAjustados = snapshot.val() || {};
+        // Atualiza a exibição dos dias ajustados
+        const container = document.getElementById('dias-ajustados');
+        container.innerHTML = '';
+        
+        for (const [date, data] of Object.entries(diasAjustados)) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'blocked-day';
+            dayElement.innerHTML = `<span>${formatDateCorrectly(date)} - ${data.vagas} vaga(s)</span>
+                <i class="bi bi-x-lg delete-ajuste-vagas" data-date="${date}" style="cursor:pointer"></i>`;
+            container.appendChild(dayElement);
+        }
+
+        document.querySelectorAll('.delete-ajuste-vagas').forEach(btn => {
+            btn.addEventListener('click', deleteAjusteVagas);
+        });
+    });
+}
+
 function filterAgendamentosByDate() {
     const dateInputElement = document.getElementById('filter-date');
     let dateInput = dateInputElement.value;
@@ -886,7 +1250,7 @@ function filterAgendamentosByDate() {
         dateInput = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
         dateInputElement.value = dateInput;
     }
-    const container = document.getElementById('agendamentos-container') || document.getElementById('agendamentos-list');
+    const container = document.getElementById('agendamentos-container');
     database.ref('agendamentos').orderByChild('data').equalTo(dateInput).once('value')
         .then(snapshot => {
             container.innerHTML = '';
@@ -894,83 +1258,291 @@ function filterAgendamentosByDate() {
                 container.innerHTML = '<p class="text-muted">Nenhum agendamento encontrado.</p>';
                 return;
             }
+            
+            const agendamentos = [];
+            snapshot.forEach(childSnapshot => {
+                const ag = childSnapshot.val();
+                if (!ag.ordemServico) { // Filtra apenas agendamentos normais
+                    agendamentos.push({
+                        id: childSnapshot.key,
+                        ...ag
+                    });
+                }
+            });
+            
+            if (agendamentos.length === 0) {
+                container.innerHTML = '<p class="text-muted">Nenhum agendamento encontrado.</p>';
+                return;
+            }
+            
             const dataFormatada = formatDateCorrectly(dateInput);
             const dateHeader = document.createElement('div');
             dateHeader.className = 'd-flex justify-content-between align-items-center mb-3';
             dateHeader.innerHTML = `<h5>${dataFormatada}</h5>
-                <span class="agendamento-count">${snapshot.numChildren()} agendamento(s)</span>`;
+                <span class="agendamento-count">${agendamentos.length} agendamento(s)</span>`;
             container.appendChild(dateHeader);
-            snapshot.forEach(childSnapshot => {
-                const agendamento = childSnapshot.val();
-                const card = createAgendamentoCard(agendamento, childSnapshot.key);
+            
+            agendamentos.forEach(ag => {
+                const card = createAgendamentoCard(ag, ag.id);
                 container.appendChild(card);
+            });
+        });
+}
+
+function filterOrdensServicoByDate() {
+    const dateInputElement = document.getElementById('filter-date-os');
+    let dateInput = dateInputElement.value;
+    if (!dateInput) { loadOrdensServico(); return; }
+    if (dateInput.includes('/')) {
+        const [day, month, year] = dateInput.split('/');
+        dateInput = `${year}-${month.padStart(2,'0')}-${day.padStart(2,'0')}`;
+        dateInputElement.value = dateInput;
+    }
+    const container = document.getElementById('ordens-servico-container');
+    database.ref('agendamentos').orderByChild('data').equalTo(dateInput).once('value')
+        .then(snapshot => {
+            container.innerHTML = '';
+            if (!snapshot.exists()) {
+                container.innerHTML = '<p class="text-muted">Nenhuma ordem de serviço encontrada.</p>';
+                return;
+            }
+            
+            const ordensServico = [];
+            snapshot.forEach(childSnapshot => {
+                const os = childSnapshot.val();
+                if (os.ordemServico) {
+                    ordensServico.push({
+                        id: childSnapshot.key,
+                        ...os
+                    });
+                }
+            });
+            
+            if (ordensServico.length === 0) {
+                container.innerHTML = '<p class="text-muted">Nenhuma ordem de serviço encontrada.</p>';
+                return;
+            }
+            
+            const dataFormatada = formatDateCorrectly(dateInput);
+            const dateHeader = document.createElement('div');
+            dateHeader.className = 'd-flex justify-content-between align-items-center mb-3';
+            dateHeader.innerHTML = `<h5>${dataFormatada}</h5>
+                <span class="agendamento-count">${ordensServico.length} ordem(ns) de serviço</span>`;
+            container.appendChild(dateHeader);
+            
+            ordensServico.forEach(os => {
+                const card = createAgendamentoCard(os, os.id);
+                container.appendChild(card);
+            });
+        });
+}
+
+function filterAgendamentosByRoteador() {
+    const filterValue = document.getElementById('filter-roteador').value;
+    const container = document.getElementById('agendamentos-container');
+    
+    if (filterValue === 'todos') {
+        loadAgendamentos();
+        return;
+    }
+    
+    database.ref('agendamentos').once('value')
+        .then(snapshot => {
+            container.innerHTML = '';
+            if (!snapshot.exists()) {
+                container.innerHTML = '<p class="text-muted">Nenhum agendamento encontrado.</p>';
+                return;
+            }
+            
+            const agendamentos = [];
+            snapshot.forEach(childSnapshot => {
+                const ag = childSnapshot.val();
+                if (!ag.ordemServico) { // Filtra apenas agendamentos normais
+                    if (filterValue === 'ok' && ag.roteador) {
+                        agendamentos.push({
+                            id: childSnapshot.key,
+                            ...ag
+                        });
+                    } else if (filterValue === 'pendente' && !ag.roteador) {
+                        agendamentos.push({
+                            id: childSnapshot.key,
+                            ...ag
+                        });
+                    }
+                }
+            });
+            
+            if (agendamentos.length === 0) {
+                container.innerHTML = '<p class="text-muted">Nenhum agendamento encontrado.</p>';
+                return;
+            }
+            
+            // Agrupa por data
+            const agendamentosPorData = agendamentos.reduce((acc, ag) => {
+                if (!acc[ag.data]) acc[ag.data] = [];
+                acc[ag.data].push(ag);
+                return acc;
+            }, {});
+            
+            const sortedDates = Object.keys(agendamentosPorData).sort();
+            
+            sortedDates.forEach(data => {
+                const ags = agendamentosPorData[data];
+                const dateHeader = document.createElement('div');
+                dateHeader.className = 'd-flex justify-content-between align-items-center mb-3';
+                const dataFormatada = formatDateCorrectly(data);
+                dateHeader.innerHTML = `<h5>${dataFormatada}</h5>
+                    <span class="agendamento-count ${ags.length > 3 ? 'warning-count' : ''}">${ags.length} agendamento(s)</span>`;
+                container.appendChild(dateHeader);
+                
+                ags.forEach(ag => {
+                    const card = createAgendamentoCard(ag, ag.id);
+                    container.appendChild(card);
+                });
             });
         });
 }
 
 function createAgendamentoCard(agendamento, id) {
     const card = document.createElement('div');
-
-    // cor da borda com hash simples
     const dateHash = (agendamento.data || '').split('-').join('');
     const colorIndex = (parseInt(dateHash || '0') % 6) + 1;
     const colorClass = `color-dia-${colorIndex}`;
 
     const badgePeriodoClass = agendamento.periodo === 'Encaixe' ? 'badge-encaixe' : 'bg-primary';
     let badgeExtra = '';
-    if (agendamento.tipo === 'reserva') badgeExtra = '<span class="badge badge-reserva ms-1">Reserva</span>';
-    else if (agendamento.roteador) badgeExtra = '<span class="badge badge-roteador ms-1">Roteador OK</span>';
+    if (agendamento.tipo === 'reserva') {
+        badgeExtra = '<span class="badge badge-reserva ms-1">Reserva</span>';
+    } else if (agendamento.ordemServico) {
+        badgeExtra = '<span class="badge badge-os ms-1">OS</span>';
+    } else if (agendamento.roteador) {
+        badgeExtra = '<span class="badge badge-roteador ms-1">Roteador OK</span>';
+    }
 
-    card.className = `card agendamento-card mb-2 ${colorClass}`;
+    const isHighlighted = agendamento.highlighted || false;
+    const isReserva = agendamento.tipo === 'reserva';
+    const convertButton = isReserva ? 
+        '<i class="bi bi-gear convert-btn" title="Converter em Agendamento" data-id="'+id+'"></i>' : '';
+
+    card.className = `card agendamento-card mb-2 ${colorClass} ${isHighlighted ? 'highlighted' : ''} ${isReserva ? 'reserva' : ''}`;
     card.innerHTML = `
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-start">
                 <div>
-                    <h6 class="card-title">${agendamento.cliente}</h6>
-                    ${agendamento.tipo === 'agendamento' ? `
-                        <p class="card-text mb-1"><small><strong>Endereço:</strong> ${agendamento.endereco}, ${agendamento.numero} ${agendamento.complemento ? ' - ' + agendamento.complemento : ''}</small></p>
-                        <p class="card-text mb-1"><small><strong>Bairro:</strong> ${agendamento.bairro}</small></p>
-                    ` : ''}
+                    <h6 class="card-title mb-1">${agendamento.cliente}</h6>
+                    <p class="card-text mb-1"><small>Endereço: ${agendamento.endereco}, ${agendamento.numero} ${agendamento.complemento ? ' | ' + agendamento.complemento : ''} | Bairro: <span class="bairro-negrito">${agendamento.bairro}</span></small></p>
+                    ${agendamento.observacoes ? `<p class="card-text observacoes mb-1"><small><strong>Obs:</strong> ${agendamento.observacoes}</small></p>` : ''}
+                    <div class="action-buttons">
+                        <input type="checkbox" class="form-check-input highlight-checkbox" data-id="${id}" ${isHighlighted ? 'checked' : ''}>
+                        ${convertButton}
+                        <i class="bi bi-arrow-repeat change-date-btn" title="Alterar Data" data-id="${id}"></i>
+                        <i class="bi bi-clipboard copy-btn" title="Copiar para Excel" data-id="${id}"></i>
+                        <i class="bi bi-pencil edit-btn" title="Editar" data-id="${id}"></i>
+                        <i class="bi bi-trash delete-btn" title="Excluir" data-id="${id}"></i>
+                    </div>
                 </div>
                 <div class="text-end">
                     <span class="badge ${badgePeriodoClass}">${agendamento.periodo}</span>
                     ${badgeExtra}
                 </div>
             </div>
-            ${agendamento.observacoes ? `<p class="card-text mt-2"><small><strong>Obs:</strong> ${agendamento.observacoes}</small></p>` : ''}
-            <div class="d-flex justify-content-between mt-2">
-                <small class="text-muted">${agendamento.createdBy ? 'Agendado por: ' + agendamento.createdBy : ''}</small>
-                <div>
-                    <i class="bi bi-clipboard copy-btn me-2" title="Copiar para Excel" data-id="${id}"></i>
-                    <i class="bi bi-pencil edit-btn me-2" title="Editar" data-id="${id}"></i>
-                    <i class="bi bi-trash delete-btn" title="Excluir" data-id="${id}"></i>
-                </div>
-            </div>
+            <small class="text-muted">${agendamento.createdBy ? 'Agendado por: ' + agendamento.createdBy : ''}</small>
         </div>
     `;
 
-    // listeners
     card.querySelector('.copy-btn')?.addEventListener('click', copyAgendamentoToClipboard);
     card.querySelector('.edit-btn')?.addEventListener('click', editAgendamento);
     card.querySelector('.delete-btn')?.addEventListener('click', deleteAgendamento);
+    card.querySelector('.change-date-btn')?.addEventListener('click', showChangeDateModal);
+    card.querySelector('.highlight-checkbox')?.addEventListener('change', toggleHighlight);
+    card.querySelector('.convert-btn')?.addEventListener('click', convertReservaToAgendamento);
 
     return card;
 }
 
-function renderAgendamentos(agendamentos) {
-    const container = document.getElementById('agendamentos-container') || document.getElementById('agendamentos-list');
-    container.innerHTML = '';
-    if (!agendamentos || agendamentos.length === 0) {
-        container.innerHTML = '<p class="text-muted">Nenhum agendamento encontrado.</p>';
+function convertReservaToAgendamento(e) {
+    if (!confirm('Deseja converter esta reserva em um agendamento completo?')) return;
+    
+    const reservaId = e.target.getAttribute('data-id');
+    database.ref('agendamentos/' + reservaId).once('value')
+        .then(snapshot => {
+            if (!snapshot.exists()) { 
+                showAlert('Reserva não encontrada!', 'danger'); 
+                return; 
+            }
+            
+            const reserva = snapshot.val();
+
+            // Força a mudança para a seção principal "Cadastrar" e para a aba "Agendamento"
+document.querySelector('.btn-menu[data-target="cadastrar"]').click();
+document.getElementById('agendamento-tab').click();
+
+            document.getElementById('data').value = reserva.data || '';
+            document.getElementById('cliente').value = reserva.cliente || '';
+            document.getElementById('endereco').value = reserva.endereco || '';
+            document.getElementById('numero').value = reserva.numero || '';
+            document.getElementById('complemento').value = reserva.complemento || '';
+            document.getElementById('bairro').value = reserva.bairro || '';
+            document.getElementById('periodo').value = reserva.periodo || '';
+            document.getElementById('observacoes').value = reserva.observacoes || '';
+            
+            document.getElementById('login-pppoe').focus();
+            
+            editingAgendamentoId = reservaId;
+            document.getElementById('submit-btn').textContent = 'Converter em Agendamento';
+            document.getElementById('cancel-edit-btn').classList.remove('d-none');
+            
+            document.getElementById('agendamento-form').scrollIntoView({ behavior: 'smooth' });
+            
+            showAlert('Preencha os dados adicionais e clique em "Converter em Agendamento"', 'info');
+        })
+        .catch(err => showAlert('Erro ao carregar reserva: ' + err.message, 'danger'));
+}
+
+
+function toggleHighlight(e) {
+    const id = e.target.getAttribute('data-id');
+    const isHighlighted = e.target.checked;
+    
+    database.ref('agendamentos/' + id).update({ 
+        highlighted: isHighlighted
+    }).catch(err => console.error('Erro ao atualizar destaque:', err));
+}
+
+function showChangeDateModal(e) {
+    const id = e.target.getAttribute('data-id');
+    const modal = new bootstrap.Modal(document.getElementById('changeDateModal'));
+    document.getElementById('changeDateModal').setAttribute('data-id', id);
+    
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('new-date').min = today;
+    
+    modal.show();
+}
+
+function confirmChangeDate() {
+    const id = document.getElementById('changeDateModal').getAttribute('data-id');
+    const newDate = document.getElementById('new-date').value;
+    
+    if (!newDate) {
+        showAlert('Selecione uma nova data', 'danger');
         return;
     }
+    
+    database.ref('agendamentos/' + id).update({ data: newDate })
+        .then(() => {
+            showAlert('Data alterada com sucesso!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('changeDateModal')).hide();
+        })
+        .catch(err => showAlert('Erro ao alterar data: ' + err.message, 'danger'));
 
-    // agrupa por data
-    const agendamentosPorData = agendamentos.reduce((acc, ag) => {
-        if (!acc[ag.data]) acc[ag.data] = [];
-        acc[ag.data].push(ag);
-        return acc;
-    }, {});
+// agrupa por data
+const agendamentosPorData = agendamentos.reduce((acc, ag) => {
+    if (!acc[ag.data]) acc[ag.data] = [];
+    acc[ag.data].push(ag);
+    return acc;
+}, {});
 
     const sortedDates = Object.keys(agendamentosPorData).sort();
 
@@ -984,6 +1556,98 @@ function renderAgendamentos(agendamentos) {
         container.appendChild(dateHeader);
         ags.forEach(ag => {
             const card = createAgendamentoCard(ag, ag.id);
+            container.appendChild(card);
+        });
+    });
+}
+
+function renderAgendamentos(agendamentos) {
+    const container = document.getElementById('agendamentos-container');
+    if (!container) {
+        console.error("Elemento 'agendamentos-container' não encontrado");
+        return;
+    }
+    
+    container.innerHTML = '';
+    
+    if (!agendamentos || agendamentos.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhum agendamento encontrado.</p>';
+        return;
+    }
+
+    // Agrupa por data
+    const agendamentosPorData = agendamentos.reduce((acc, ag) => {
+        if (!ag.data) return acc;  // Adicionado tratamento para dados sem data
+        
+        if (!acc[ag.data]) {
+            acc[ag.data] = [];
+        }
+        acc[ag.data].push(ag);
+        return acc;
+    }, {});
+
+    // Ordena as datas
+    const sortedDates = Object.keys(agendamentosPorData).sort();
+
+    // Renderiza para cada data
+    sortedDates.forEach(data => {
+        const ags = agendamentosPorData[data];
+        if (!ags || ags.length === 0) return;  // Adicionado verificação de segurança
+        
+        const dateHeader = document.createElement('div');
+        dateHeader.className = 'd-flex justify-content-between align-items-center mb-3';
+        
+        try {
+            const dataFormatada = formatDateCorrectly(data);
+            dateHeader.innerHTML = `
+                <h5>${dataFormatada}</h5>
+                <span class="agendamento-count ${ags.length > 3 ? 'warning-count' : ''}">
+                    ${ags.length} agendamento(s)
+                </span>
+            `;
+            container.appendChild(dateHeader);
+            
+            ags.forEach(ag => {
+                if (ag) {  // Verificação adicional
+                    const card = createAgendamentoCard(ag, ag.id);
+                    if (card) {
+                        container.appendChild(card);
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Erro ao renderizar agendamentos para data:", data, error);
+        }
+    });
+}
+
+function renderOrdensServico(ordensServico) {
+    const container = document.getElementById('ordens-servico-container');
+    container.innerHTML = '';
+    if (!ordensServico || ordensServico.length === 0) {
+        container.innerHTML = '<p class="text-muted">Nenhuma ordem de serviço encontrada.</p>';
+        return;
+    }
+
+    // agrupa por data
+    const ordensPorData = ordensServico.reduce((acc, os) => {
+        if (!acc[os.data]) acc[os.data] = [];
+        acc[os.data].push(os);
+        return acc;
+    }, {});
+
+    const sortedDates = Object.keys(ordensPorData).sort();
+
+    sortedDates.forEach(data => {
+        const ordens = ordensPorData[data];
+        const dateHeader = document.createElement('div');
+        dateHeader.className = 'd-flex justify-content-between align-items-center mb-3';
+        const dataFormatada = formatDateCorrectly(data);
+        dateHeader.innerHTML = `<h5>${dataFormatada}</h5>
+            <span class="agendamento-count">${ordens.length} ordem(ns) de serviço</span>`;
+        container.appendChild(dateHeader);
+        ordens.forEach(os => {
+            const card = createAgendamentoCard(os, os.id);
             container.appendChild(card);
         });
     });
@@ -1011,19 +1675,18 @@ function checkAgendamentoLimit() {
             return;
         }
 
+        // Verifica se há ajuste de vagas para este dia
+        const limiteAjustado = diasAjustados[date]?.vagas;
+        
         database.ref('agendamentos').orderByChild('data').equalTo(date).once('value')
             .then(snapshot => {
                 const count = snapshot.numChildren();
                 const infoElement = document.getElementById('data-info');
                 const submitBtn = document.getElementById('submit-btn');
 
-                // limites originais de cadastro (mantidos)
-                let limiteAviso = 3;
-                let limiteMaximo = 5;
-                if (isSaturday(date)) {
-                    limiteAviso = 1;
-                    limiteMaximo = 3;
-                }
+                // limites originais de cadastro (mantidos) ou ajustados
+                let limiteAviso = limiteAjustado ? limiteAjustado - 1 : 3;
+                let limiteMaximo = limiteAjustado || (isSaturday(date) ? 3 : 5);
 
                 if (count >= limiteMaximo) {
                     infoElement.textContent = `Este dia já atingiu o limite máximo de ${limiteMaximo} agendamentos. Não é possível agendar mais.`;
@@ -1078,18 +1741,18 @@ function checkReservaLimit() {
             document.getElementById('submit-reserva-btn').disabled = true;
             return;
         }
+        
+        // Verifica se há ajuste de vagas para este dia
+        const limiteAjustado = diasAjustados[date]?.vagas;
+        
         database.ref('agendamentos').orderByChild('data').equalTo(date).once('value')
             .then(snapshot => {
                 const count = snapshot.numChildren();
                 const infoElement = document.getElementById('reserva-data-info');
                 const submitBtn = document.getElementById('submit-reserva-btn');
 
-                let limiteAviso = 3;
-                let limiteMaximo = 5;
-                if (isSaturday(date)) {
-                    limiteAviso = 1;
-                    limiteMaximo = 3;
-                }
+                let limiteAviso = limiteAjustado ? limiteAjustado - 1 : 3;
+                let limiteMaximo = limiteAjustado || (isSaturday(date) ? 3 : 5);
 
                 if (count >= limiteMaximo) {
                     infoElement.textContent = `Este dia já atingiu o limite máximo de ${limiteMaximo} agendamentos. Não é possível reservar mais.`;
@@ -1144,7 +1807,9 @@ function requestExtraAuthorization() {
 /* ---------- Dias bloqueados: load, add, delete ---------- */
 function loadBlockedDays() {
     database.ref('blockedDays').on('value', snapshot => {
-        const container = document.getElementById('blocked-days-container') || document.getElementById('dias-bloqueados');
+        const container = document.getElementById('dias-bloqueados');
+        if (!container) return;
+        
         container.innerHTML = '';
         snapshot.forEach(childSnapshot => {
             const date = childSnapshot.key;
@@ -1162,22 +1827,6 @@ function loadBlockedDays() {
     });
 }
 
-function addBlockedDay() {
-    const date = prompt('Digite a data a ser bloqueada (YYYY-MM-DD):');
-    if (!date) return;
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-        showAlert('Formato de data inválido. Use YYYY-MM-DD.', 'danger');
-        return;
-    }
-    const reason = prompt('Motivo do bloqueio (opcional):') || '';
-    database.ref('blockedDays/' + date).set({
-        reason: reason,
-        blockedAt: firebase.database.ServerValue.TIMESTAMP
-    })
-    .then(()=> showAlert('Dia bloqueado com sucesso!', 'success'))
-    .catch(err => showAlert('Erro ao bloquear dia: ' + err.message, 'danger'));
-}
-
 function deleteBlockedDay(e) {
     const date = e.target.getAttribute('data-date');
     if (!confirm(`Desbloquear o dia ${formatDateCorrectly(date)}?`)) return;
@@ -1186,8 +1835,20 @@ function deleteBlockedDay(e) {
         .catch(err => showAlert('Erro ao desbloquear dia: ' + err.message, 'danger'));
 }
 
+/* ---------- Ajuste de vagas: delete ---------- */
+function deleteAjusteVagas(e) {
+    const date = e.target.getAttribute('data-date');
+    if (!confirm(`Remover o ajuste de vagas para o dia ${formatDateCorrectly(date)}?`)) return;
+    database.ref('diasAjustados/' + date).remove()
+        .then(()=> {
+            showAlert('Ajuste de vagas removido com sucesso!', 'success');
+            calcularProximasVagas();
+        })
+        .catch(err => showAlert('Erro ao remover ajuste de vagas: ' + err.message, 'danger'));
+}
+
 // Copia agendamento para clipboard no formato para Excel
-        function copyAgendamentoToClipboard(e) {
+function copyAgendamentoToClipboard(e) {
     const id = e.target.getAttribute('data-id');
     database.ref('agendamentos/' + id).once('value')
         .then(snapshot => {
@@ -1219,27 +1880,40 @@ function editAgendamento(e) {
         .then(snapshot => {
             if (!snapshot.exists()) { showAlert('Agendamento não encontrado!', 'danger'); return; }
             const agendamento = snapshot.val();
+
+            
             if (agendamento.tipo === 'reserva') {
-                document.getElementById('reserva-tab').click();
-                document.getElementById('reserva-data').value = agendamento.data || '';
-                document.getElementById('reserva-cliente').value = agendamento.cliente || '';
-                document.getElementById('reserva-periodo').value = agendamento.periodo || '';
-            } else {
-                document.getElementById('agendamento-tab').click();
-                document.getElementById('data').value = agendamento.data || '';
-                document.getElementById('cliente').value = agendamento.cliente || '';
-                document.getElementById('endereco').value = agendamento.endereco || '';
-                document.getElementById('numero').value = agendamento.numero || '';
-                document.getElementById('complemento').value = agendamento.complemento || '';
-                document.getElementById('bairro').value = agendamento.bairro || '';
-                document.getElementById('periodo').value = agendamento.periodo || '';
-                document.getElementById('observacoes').value = agendamento.observacoes || '';
-                document.getElementById('login-pppoe').value = agendamento.loginPPPoE || '';
-                document.getElementById('senha-pppoe').value = agendamento.senhaPPPoE || '';
-                document.getElementById('nome-wifi').value = agendamento.nomeWifi || '';
-                document.getElementById('senha-wifi').value = agendamento.senhaWifi || '';
-                document.getElementById('roteador').checked = !!agendamento.roteador;
+                // Pergunta se deseja converter em agendamento
+                if (confirm('Deseja converter esta reserva em um agendamento?')) {
+                    // Remove o tipo reserva para converter em agendamento normal
+                    delete agendamento.tipo;
+                }
             }
+
+		// Força a mudança para a seção correta
+document.querySelector('.btn-menu[data-target="cadastrar"]').click();
+if (agendamento.tipo === 'reserva') {
+    document.getElementById('reserva-tab').click();
+} else {
+    document.getElementById('agendamento-tab').click();
+}
+            
+            document.getElementById('agendamento-tab').click();
+            document.getElementById('data').value = agendamento.data || '';
+            document.getElementById('cliente').value = agendamento.cliente || '';
+            document.getElementById('endereco').value = agendamento.endereco || '';
+            document.getElementById('numero').value = agendamento.numero || '';
+            document.getElementById('complemento').value = agendamento.complemento || '';
+            document.getElementById('bairro').value = agendamento.bairro || '';
+            document.getElementById('periodo').value = agendamento.periodo || '';
+            document.getElementById('observacoes').value = agendamento.observacoes || '';
+            document.getElementById('login-pppoe').value = agendamento.loginPPPoE || '';
+            document.getElementById('senha-pppoe').value = agendamento.senhaPPPoE || '';
+            document.getElementById('nome-wifi').value = agendamento.nomeWifi || '';
+            document.getElementById('senha-wifi').value = agendamento.senhaWifi || '';
+            document.getElementById('roteador').checked = !!agendamento.roteador;
+            document.getElementById('ordem-servico').checked = !!agendamento.ordemServico;
+            
             editingAgendamentoId = agendamentoId;
             document.getElementById('submit-btn').textContent = 'Atualizar';
             document.getElementById('cancel-edit-btn').classList.remove('d-none');
@@ -1275,7 +1949,7 @@ function resetForm() {
     document.getElementById('data-info').textContent = '';
 }
 
-/* ---------- Função calcularProximasVagas() (sáb=1, semana=3) ---------- */
+/* ---------- Função calcularProximasVagas() (considera dias ajustados) ---------- */
 function calcularProximasVagas() {
     const hoje = new Date();
     hoje.setHours(0,0,0,0);
@@ -1301,8 +1975,11 @@ function calcularProximasVagas() {
             database.ref('blockedDays/' + dataStr).once('value').then(snapshot => {
                 if (snapshot.exists()) { resolve(null); return; }
 
-                // limite para exibição de próximas vagas (requisitado): sábado=1, semana=3
-                const limite = (data.getDay() === 6) ? 1 : 3;
+                // Verifica se há ajuste de vagas para este dia
+                const limiteAjustado = diasAjustados[dataStr]?.vagas;
+                
+                // limite para exibição de próximas vagas: considera dias ajustados
+                const limite = limiteAjustado || (data.getDay() === 6 ? 1 : 3);
 
                 database.ref('agendamentos').orderByChild('data').equalTo(dataStr).once('value')
                     .then(agSnap => {
@@ -1341,7 +2018,9 @@ function calcularProximasVagas() {
             const agendamentos = [];
             snapshot.forEach(childSnapshot => {
                 const ag = childSnapshot.val();
-                agendamentos.push({ id: childSnapshot.key, ...ag });
+                if (!ag.ordemServico) { // Filtra apenas agendamentos normais
+                    agendamentos.push({ id: childSnapshot.key, ...ag });
+                }
             });
             renderAgendamentos(agendamentos);
             calcularProximasVagas();
@@ -1351,7 +2030,7 @@ function calcularProximasVagas() {
     const originalLoadBlockedDays = loadBlockedDays;
     loadBlockedDays = function() {
         database.ref('blockedDays').on('value', snapshot => {
-            const container = document.getElementById('blocked-days-container') || document.getElementById('dias-bloqueados');
+            const container = document.getElementById('dias-bloqueados');
             container.innerHTML = '';
             snapshot.forEach(childSnapshot => {
                 const date = childSnapshot.key;
@@ -1374,26 +2053,23 @@ function calcularProximasVagas() {
 
 /* ---------- Inicialização final após DOM pronto ---------- */
 document.addEventListener('DOMContentLoaded', function() {
-    // configura datas mínimas nos inputs
     const todayISO = new Date().toISOString().split('T')[0];
     document.getElementById('data').min = todayISO;
     const fd = document.getElementById('filter-date'); if (fd) fd.min = todayISO;
     const rd = document.getElementById('reserva-data'); if (rd) rd.min = todayISO;
     const bd = document.getElementById('bloqueio-data'); if (bd) bd.min = todayISO;
+    const avd = document.getElementById('ajuste-vagas-data'); if (avd) avd.min = todayISO;
 
     setupEventListeners();
-
-    // inicializa auth listener e, se já estiver logado, carrega dados
     initAuth();
 
-    // Se já houver usuário ativo (persistência), garantir load e cálculo
     if (auth.currentUser) {
         currentUser = auth.currentUser;
         showAppContent();
         updateUIForUser(currentUser);
         loadAgendamentos();
         loadBlockedDays();
-        calcularProximasVagas();
+        loadDiasAjustados();
     }
 });
 </script>
