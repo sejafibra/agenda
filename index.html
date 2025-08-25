@@ -1424,29 +1424,37 @@ function createAgendamentoCard(agendamento, id) {
     const convertButton = isReserva ? 
         '<i class="bi bi-gear convert-btn" title="Converter em Agendamento" data-id="'+id+'"></i>' : '';
 
+    // Extrair apenas o nome do e-mail (parte antes do @)
+    let userName = '';
+    if (agendamento.createdBy) {
+        userName = agendamento.createdBy.split('@')[0];
+    }
+
     card.className = `card agendamento-card mb-2 ${colorClass} ${isHighlighted ? 'highlighted' : ''} ${isReserva ? 'reserva' : ''}`;
     card.innerHTML = `
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-start">
-                <div>
+                <div class="flex-grow-1">
                     <h6 class="card-title mb-1">${agendamento.cliente}</h6>
                     <p class="card-text mb-1"><small>Endereço: ${agendamento.endereco}, ${agendamento.numero} ${agendamento.complemento ? ' | ' + agendamento.complemento : ''} | Bairro: <span class="bairro-negrito">${agendamento.bairro}</span></small></p>
                     ${agendamento.observacoes ? `<p class="card-text observacoes mb-1"><small><strong>Obs:</strong> ${agendamento.observacoes}</small></p>` : ''}
-                    <div class="action-buttons">
-                        <input type="checkbox" class="form-check-input highlight-checkbox" data-id="${id}" ${isHighlighted ? 'checked' : ''}>
-                        ${convertButton}
-                        <i class="bi bi-arrow-repeat change-date-btn" title="Alterar Data" data-id="${id}"></i>
-                        <i class="bi bi-clipboard copy-btn" title="Copiar para Excel" data-id="${id}"></i>
-                        <i class="bi bi-pencil edit-btn" title="Editar" data-id="${id}"></i>
-                        <i class="bi bi-trash delete-btn" title="Excluir" data-id="${id}"></i>
-                    </div>
                 </div>
-                <div class="text-end">
-                    <span class="badge ${badgePeriodoClass}">${agendamento.periodo}</span>
-                    ${badgeExtra}
+                <div class="text-end ms-3">
+                    <div class="d-flex justify-content-end align-items-center mb-1">
+                        <div class="action-buttons me-2">
+                            <input type="checkbox" class="form-check-input highlight-checkbox" data-id="${id}" ${isHighlighted ? 'checked' : ''}>
+                            ${convertButton}
+                            <i class="bi bi-arrow-repeat change-date-btn" title="Alterar Data" data-id="${id}"></i>
+                            <i class="bi bi-clipboard copy-btn" title="Copiar para Excel" data-id="${id}"></i>
+                            <i class="bi bi-pencil edit-btn" title="Editar" data-id="${id}"></i>
+                            <i class="bi bi-trash delete-btn" title="Excluir" data-id="${id}"></i>
+                        </div>
+                        <span class="badge ${badgePeriodoClass}">${agendamento.periodo}</span>
+                        ${badgeExtra}
+                    </div>
+                    ${userName ? `<small class="text-muted d-block text-end">Agendado por: ${userName}</small>` : ''}
                 </div>
             </div>
-            <small class="text-muted">${agendamento.createdBy ? 'Agendado por: ' + agendamento.createdBy : ''}</small>
         </div>
     `;
 
@@ -1951,60 +1959,62 @@ function resetForm() {
 
 /* ---------- Função calcularProximasVagas() (considera dias ajustados) ---------- */
 function calcularProximasVagas() {
-    const hoje = new Date();
-    hoje.setHours(0,0,0,0);
+    const hoje = new Date().toISOString().split("T")[0];
+    const diasComContagem = {};
 
-    const proximosDias = [];
-    const maxDiasVerificados = 30;
-    let diasVerificados = 0;
+    database.ref("agendamentos").once("value").then(snapshot => {
+        snapshot.forEach(childSnapshot => {
+            const agendamento = childSnapshot.val();
+            const data = agendamento.data;
+            const tipo = agendamento.tipo || "agendamento";
 
-    function verificarDia(data) {
-        return new Promise((resolve) => {
-            const yyyy = data.getFullYear();
-            const mm = String(data.getMonth() + 1).padStart(2, '0');
-            const dd = String(data.getDate()).padStart(2, '0');
-            const dataStr = `${yyyy}-${mm}-${dd}`;
+            // Ignorar ordens de serviço
+            if (agendamento.ordemServico) return;
 
-            // Ignora domingos
-            if (data.getDay() === 0) {
-                resolve(null);
-                return;
+            // Contabiliza apenas agendamentos normais e reservas
+            if (tipo === "agendamento" || tipo === "reserva") {
+                if (!diasComContagem[data]) {
+                    diasComContagem[data] = 0;
+                }
+                diasComContagem[data]++;
+            }
+        });
+
+        const proximasVagas = [];
+        let contador = 0;
+        let dataAtual = new Date(hoje);
+
+        while (contador < 3) {
+            dataAtual.setDate(dataAtual.getDate() + 1);
+            const dataStr = dataAtual.toISOString().split("T")[0];
+
+            if (isSunday(dataStr)) continue; // pula domingos
+
+            // Definição de limites
+            let limiteMaximo = isSaturday(dataStr) ? 1 : 3;
+
+            // Se houve ajuste manual de vagas, respeita ele
+            if (diasAjustados[dataStr]?.vagas) {
+                limiteMaximo = diasAjustados[dataStr].vagas;
             }
 
-            // Verifica bloqueado
-            database.ref('blockedDays/' + dataStr).once('value').then(snapshot => {
-                if (snapshot.exists()) { resolve(null); return; }
+            const ocupadas = diasComContagem[dataStr] || 0;
+            const vagasDisponiveis = limiteMaximo - ocupadas;
 
-                // Verifica se há ajuste de vagas para este dia
-                const limiteAjustado = diasAjustados[dataStr]?.vagas;
-                
-                // limite para exibição de próximas vagas: considera dias ajustados
-                const limite = limiteAjustado || (data.getDay() === 6 ? 1 : 3);
-
-                database.ref('agendamentos').orderByChild('data').equalTo(dataStr).once('value')
-                    .then(agSnap => {
-                        const total = agSnap.numChildren();
-                        const vagas = limite - total;
-                        if (vagas > 0) {
-                            proximosDias.push({ data: `${dd}/${mm}`, vagas });
-                        }
-                        resolve();
-                    });
-            });
-        });
-    }
-
-    (async function() {
-        // percorre dias a partir de amanhã até preencher 3 dias com vagas ou alcançar limite de dias verificados
-        while (proximosDias.length < 3 && diasVerificados < maxDiasVerificados) {
-            hoje.setDate(hoje.getDate() + 1);
-            await verificarDia(new Date(hoje));
-            diasVerificados++;
+            if (vagasDisponiveis > 0) {
+                proximasVagas.push({ data: dataStr, vagas: vagasDisponiveis });
+                contador++;
+            }
         }
-        const vagasTexto = proximosDias.map(d => `${d.data} (${d.vagas})`).join(', ');
-        document.getElementById('proximas-vagas').textContent =
-            proximosDias.length > 0 ? `Próx. vagas: ${vagasTexto}` : 'Nenhuma vaga disponível nos próximos dias';
-    })();
+
+        // Monta string de exibição
+        const proximasVagasStr = proximasVagas
+            .map(v => `${v.data.split("-").reverse().join("/")} (${v.vagas})`)
+            .join(", ");
+
+        document.getElementById("proximas-vagas").textContent =
+            "Próx. vagas: " + proximasVagasStr;
+    });
 }
 
 /* ---------- Interceptadores para recalcular vagas após loads ---------- */
