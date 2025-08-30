@@ -502,7 +502,7 @@
                                                                     <label for="periodo" class="form-field-label">Período da Instalação</label>
                                                                     <select class="form-select" id="periodo" required>
                                                                         <option value="">Selecione...</option>
-                                                                        <option value="Inicial">Inicial</option>
+                                                                        <option value="1ª do Dia">1ª do Dia</option>
                                                                         <option value="Manhã">Manhã</option>
                                                                         <option value="Tarde">Tarde</option>
                                                                         <option value="Horário Comercial">Horário Comercial</option>
@@ -573,7 +573,7 @@
                                                                 <label for="reserva-periodo" class="form-label">Período</label>
                                                                 <select class="form-select" id="reserva-periodo" required>
                                                                     <option value="">Selecione...</option>
-                                                                    <option value="Inicial">Inicial</option>
+                                                                    <option value="1ª do Dia">1ª do Dia</option>
                                                                     <option value="Manhã">Manhã</option>
                                                                     <option value="Tarde">Tarde</option>
                                                                     <option value="Horário Comercial">Horário Comercial</option>
@@ -1009,6 +1009,10 @@ function setupEventListeners() {
         checkAgendamentoLimit();
     });
 
+	// ordem de serviço checkbox change
+   	 const osCheckbox = document.getElementById('ordem-servico');
+   	 if (osCheckbox) osCheckbox.addEventListener('change', checkAgendamentoLimit);
+
     document.getElementById('reserva-data').addEventListener('change', function(e) {
         let dateValue = e.target.value;
         if (dateValue.includes('/')) {
@@ -1412,12 +1416,15 @@ function createAgendamentoCard(agendamento, id) {
     const badgePeriodoClass = agendamento.periodo === 'Encaixe' ? 'badge-encaixe' : 'bg-primary';
     let badgeExtra = '';
     if (agendamento.tipo === 'reserva') {
-        badgeExtra = '<span class="badge badge-reserva ms-1">Reserva</span>';
-    } else if (agendamento.ordemServico) {
-        badgeExtra = '<span class="badge badge-os ms-1">OS</span>';
-    } else if (agendamento.roteador) {
-        badgeExtra = '<span class="badge badge-roteador ms-1">Roteador OK</span>';
-    }
+    badgeExtra += '<span class="badge badge-reserva ms-1">Reserva</span>';
+	}
+	if (agendamento.ordemServico) {
+    badgeExtra += '<span class="badge badge-os ms-1">OS</span>';
+	}
+	if (agendamento.roteador) {
+    badgeExtra += '<span class="badge badge-roteador ms-1">Roteador OK</span>';
+	}
+
 
     const isHighlighted = agendamento.highlighted || false;
     const isReserva = agendamento.tipo === 'reserva';
@@ -1663,10 +1670,17 @@ function renderOrdensServico(ordensServico) {
 
 /* ---------- Verificadores de limite (mantidos) ---------- */
 function checkAgendamentoLimit() {
-    const dateInput = document.getElementById('data');
-    const date = dateInput.value;
+    const date = document.getElementById('data').value;
     if (!date) return;
 
+    const isOS = document.getElementById('ordem-servico').checked;
+    if (isOS) {
+        document.getElementById('data-info').textContent = "Agendamento de OS - sem limite de vagas.";
+        document.getElementById('data-info').className = 'form-text text-success';
+        document.getElementById('submit-btn').disabled = false;
+        return; // pula o resto da verificação
+    }
+    
     if (isSunday(date)) {
         document.getElementById('data-info').textContent = 'Não é possível agendar aos domingos.';
         document.getElementById('data-info').className = 'form-text text-danger';
@@ -1683,50 +1697,76 @@ function checkAgendamentoLimit() {
             return;
         }
 
+	// Se for Ordem de Serviço, ignora limite de vagas (mas mantém domingo/dia bloqueado)
+	const osMarcada = document.getElementById('ordem-servico')?.checked;
+	if (osMarcada) {
+  	const info = document.getElementById('data-info');
+	  info.textContent = 'Ordem de Serviço: não conta no limite diário.';
+	  info.className = 'form-text text-info';
+	  document.getElementById('submit-btn').disabled = false;
+	  currentExtraAgendamento = null;
+	  return; // não precisa contar nada
+	}
+
+
         // Verifica se há ajuste de vagas para este dia
         const limiteAjustado = diasAjustados[date]?.vagas;
         
         database.ref('agendamentos').orderByChild('data').equalTo(date).once('value')
             .then(snapshot => {
-                const count = snapshot.numChildren();
+                let count = 0;
+	snapshot.forEach(child => {
+	  const ag = child.val();
+	  if (!ag?.ordemServico) count++;
+	});
+
                 const infoElement = document.getElementById('data-info');
                 const submitBtn = document.getElementById('submit-btn');
 
                 // limites originais de cadastro (mantidos) ou ajustados
-                let limiteAviso = limiteAjustado ? limiteAjustado - 1 : 3;
-                let limiteMaximo = limiteAjustado || (isSaturday(date) ? 3 : 5);
+let limiteAviso = limiteAjustado ? limiteAjustado - 1 : 3;
+let limiteMaximo = limiteAjustado || (isSaturday(date) ? 3 : 5);
 
-                if (count >= limiteMaximo) {
-                    infoElement.textContent = `Este dia já atingiu o limite máximo de ${limiteMaximo} agendamentos. Não é possível agendar mais.`;
-                    infoElement.className = 'form-text text-danger';
-                    submitBtn.disabled = true;
-                    return;
-                } else if (count >= limiteAviso) {
-                    infoElement.textContent = `Este dia já possui ${count} agendamento(s). Agendamentos extras requerem autorização.`;
-                    infoElement.className = 'form-text text-warning';
-                    submitBtn.disabled = false;
+if (count >= limiteMaximo) {
+    infoElement.textContent = `Este dia já atingiu o limite máximo de ${limiteMaximo} agendamentos. Não é possível agendar mais.`;
+    infoElement.className = 'form-text text-danger';
+    submitBtn.disabled = true;
+    return;
+} else if (count >= limiteAviso) {
+    infoElement.textContent = `Este dia já possui ${count} agendamento(s). Agendamentos extras requerem autorização.`;
+    infoElement.className = 'form-text text-warning';
+    submitBtn.disabled = false;
 
-                    currentExtraAgendamento = { data: date, currentCount: count, isSaturday: isSaturday(date) };
+    currentExtraAgendamento = { data: date, currentCount: count, isSaturday: isSaturday(date) };
 
-                    const modalMessage = document.getElementById('modal-message');
-                    const modalLimite = document.getElementById('modal-limite');
+    const modalMessage = document.getElementById('modal-message');
+    const modalLimite = document.getElementById('modal-limite');
 
-                    if (isSaturday(date)) {
-                        modalMessage.textContent = 'Este sábado já possui 1 agendamento. Deseja solicitar autorização para um agendamento extra?';
-                        modalLimite.textContent = 'Máximo de 2 agendamentos extras por sábado (total de 3).';
-                    } else {
-                        modalMessage.textContent = 'Este dia já possui 3 agendamentos. Deseja solicitar autorização para um agendamento extra?';
-                        modalLimite.textContent = 'Máximo de 2 agendamentos extras por dia (total de 5).';
-                    }
+    if (isSaturday(date)) {
+        modalMessage.textContent = 'Este sábado já possui 1 agendamento. Deseja solicitar autorização para um agendamento extra?';
+        modalLimite.textContent = 'Máximo de 2 agendamentos extras por sábado (total de 3).';
+    } else {
+        modalMessage.textContent = 'Este dia já possui 3 agendamentos. Deseja solicitar autorização para um agendamento extra?';
+        modalLimite.textContent = 'Máximo de 2 agendamentos extras por dia (total de 5).';
+    }
 
-                    const modal = new bootstrap.Modal(document.getElementById('extraModal'));
-                    modal.show();
-                } else {
-                    infoElement.textContent = `Este dia possui ${count} agendamento(s).`;
-                    infoElement.className = 'form-text text-muted';
-                    submitBtn.disabled = false;
-                    currentExtraAgendamento = null;
-                }
+    const modal = new bootstrap.Modal(document.getElementById('extraModal'));
+    modal.show();
+} else {
+    // 🔹 Ajuste fino: sábado com 1 agendamento cai aqui
+    if (isSaturday(date) && count === 1) {
+        infoElement.textContent = `Este dia já possui 1 agendamento(s). Agendamentos extras requerem autorização.`;
+        infoElement.className = 'form-text text-warning';
+        submitBtn.disabled = false;
+        currentExtraAgendamento = { data: date, currentCount: count, isSaturday: true };
+    } else {
+        infoElement.textContent = `Este dia possui ${count} agendamento(s).`;
+        infoElement.className = 'form-text text-muted';
+        submitBtn.disabled = false;
+        currentExtraAgendamento = null;
+    }
+}
+
             });
     });
 }
@@ -1755,44 +1795,58 @@ function checkReservaLimit() {
         
         database.ref('agendamentos').orderByChild('data').equalTo(date).once('value')
             .then(snapshot => {
-                const count = snapshot.numChildren();
-                const infoElement = document.getElementById('reserva-data-info');
-                const submitBtn = document.getElementById('submit-reserva-btn');
+                // Conta apenas reservas e agendamentos normais (ignora OS)
+let count = 0;
+snapshot.forEach(child => {
+    const ag = child.val();
+    if (!ag?.ordemServico) count++;
+});
+const infoElement = document.getElementById('reserva-data-info');
+const submitBtn = document.getElementById('submit-reserva-btn');
 
-                let limiteAviso = limiteAjustado ? limiteAjustado - 1 : 3;
-                let limiteMaximo = limiteAjustado || (isSaturday(date) ? 3 : 5);
+let limiteAviso = limiteAjustado ? limiteAjustado - 1 : 3;
+let limiteMaximo = limiteAjustado || (isSaturday(date) ? 3 : 5);
 
-                if (count >= limiteMaximo) {
-                    infoElement.textContent = `Este dia já atingiu o limite máximo de ${limiteMaximo} agendamentos. Não é possível reservar mais.`;
-                    infoElement.className = 'form-text text-danger';
-                    submitBtn.disabled = true;
-                    return;
-                } else if (count >= limiteAviso) {
-                    infoElement.textContent = `Este dia já possui ${count} agendamento(s). Reservas extras requerem autorização.`;
-                    infoElement.className = 'form-text text-warning';
-                    submitBtn.disabled = false;
+if (count >= limiteMaximo) {
+    infoElement.textContent = `Este dia já atingiu o limite máximo de ${limiteMaximo} agendamentos. Não é possível reservar mais.`;
+    infoElement.className = 'form-text text-danger';
+    submitBtn.disabled = true;
+    return;
+} else if (count >= limiteAviso) {
+    infoElement.textContent = `Este dia já possui ${count} agendamento(s). Reservas extras requerem autorização.`;
+    infoElement.className = 'form-text text-warning';
+    submitBtn.disabled = false;
 
-                    currentExtraAgendamento = { data: date, currentCount: count, isSaturday: isSaturday(date) };
+    currentExtraAgendamento = { data: date, currentCount: count, isSaturday: isSaturday(date) };
 
-                    const modalMessage = document.getElementById('modal-message');
-                    const modalLimite = document.getElementById('modal-limite');
+    const modalMessage = document.getElementById('modal-message');
+    const modalLimite = document.getElementById('modal-limite');
 
-                    if (isSaturday(date)) {
-                        modalMessage.textContent = 'Este sábado já possui 1 agendamento. Deseja solicitar autorização para uma reserva extra?';
-                        modalLimite.textContent = 'Máximo de 2 reservas extras por sábado (total de 3).';
-                    } else {
-                        modalMessage.textContent = 'Este dia já possui 3 agendamentos. Deseja solicitar autorização para uma reserva extra?';
-                        modalLimite.textContent = 'Máximo de 2 reservas extras por dia (total de 5).';
-                    }
+    if (isSaturday(date)) {
+        modalMessage.textContent = 'Este sábado já possui 1 agendamento. Deseja solicitar autorização para uma reserva extra?';
+        modalLimite.textContent = 'Máximo de 2 reservas extras por sábado (total de 3).';
+    } else {
+        modalMessage.textContent = 'Este dia já possui 3 agendamentos. Deseja solicitar autorização para uma reserva extra?';
+        modalLimite.textContent = 'Máximo de 2 reservas extras por dia (total de 5).';
+    }
 
-                    const modal = new bootstrap.Modal(document.getElementById('extraModal'));
-                    modal.show();
-                } else {
-                    infoElement.textContent = `Este dia possui ${count} agendamento(s).`;
-                    infoElement.className = 'form-text text-muted';
-                    submitBtn.disabled = false;
-                    currentExtraAgendamento = null;
-                }
+    const modal = new bootstrap.Modal(document.getElementById('extraModal'));
+    modal.show();
+} else {
+    // 🔹 Ajuste fino: sábado com 1 agendamento cai aqui
+    if (isSaturday(date) && count === 1) {
+        infoElement.textContent = `Este dia já possui 1 agendamento(s). Reservas extras requerem autorização.`;
+        infoElement.className = 'form-text text-warning';
+        submitBtn.disabled = false;
+        currentExtraAgendamento = { data: date, currentCount: count, isSaturday: true };
+    } else {
+        infoElement.textContent = `Este dia possui ${count} agendamento(s).`;
+        infoElement.className = 'form-text text-muted';
+        submitBtn.disabled = false;
+        currentExtraAgendamento = null;
+    }
+}
+
             });
     });
 }
