@@ -2011,11 +2011,12 @@ function resetForm() {
     document.getElementById('data-info').textContent = '';
 }
 
-/* ---------- Função calcularProximasVagas() (considera dias ajustados) ---------- */
+/* ---------- Função calcularProximasVagas() (considera dias ajustados e bloqueados) ---------- */
 function calcularProximasVagas() {
     const hoje = new Date().toISOString().split("T")[0];
     const diasComContagem = {};
 
+    // Primeiro busca agendamentos normais (sem OS)
     database.ref("agendamentos").once("value").then(snapshot => {
         snapshot.forEach(childSnapshot => {
             const agendamento = childSnapshot.val();
@@ -2034,43 +2035,50 @@ function calcularProximasVagas() {
             }
         });
 
-        const proximasVagas = [];
-        let contador = 0;
-        let dataAtual = new Date(hoje);
+        // Depois busca dias bloqueados
+        database.ref("blockedDays").once("value").then(blockedSnapshot => {
+            const diasBloqueados = blockedSnapshot.val() || {};
 
-        while (contador < 3) {
-            dataAtual.setDate(dataAtual.getDate() + 1);
-            const dataStr = dataAtual.toISOString().split("T")[0];
+            const proximasVagas = [];
+            let contador = 0;
+            let dataAtual = new Date(hoje);
 
-            if (isSunday(dataStr)) continue; // pula domingos
+            while (contador < 3) {
+                dataAtual.setDate(dataAtual.getDate() + 1);
+                const dataStr = dataAtual.toISOString().split("T")[0];
 
-            // Definição de limites
-            let limiteMaximo = isSaturday(dataStr) ? 1 : 3;
+                if (isSunday(dataStr)) continue; // pula domingos
+                if (diasBloqueados[dataStr]) continue; // pula dias bloqueados
 
-            // Se houve ajuste manual de vagas, respeita ele
-            if (diasAjustados[dataStr]?.vagas) {
-                limiteMaximo = diasAjustados[dataStr].vagas;
+                // Definição de limites
+                let limiteMaximo = isSaturday(dataStr) ? 1 : 3;
+
+                // Se houve ajuste manual de vagas, respeita ele
+                if (diasAjustados[dataStr]?.vagas) {
+                    limiteMaximo = diasAjustados[dataStr].vagas;
+                }
+
+                const ocupadas = diasComContagem[dataStr] || 0;
+                const vagasDisponiveis = limiteMaximo - ocupadas;
+
+                if (vagasDisponiveis > 0) {
+                    proximasVagas.push({ data: dataStr, vagas: vagasDisponiveis });
+                    contador++;
+                }
             }
 
-            const ocupadas = diasComContagem[dataStr] || 0;
-            const vagasDisponiveis = limiteMaximo - ocupadas;
+            // Monta string de exibição
+            const proximasVagasStr = proximasVagas
+                .map(v => `${v.data.split("-").reverse().join("/")} (${v.vagas})`)
+                .join(", ");
 
-            if (vagasDisponiveis > 0) {
-                proximasVagas.push({ data: dataStr, vagas: vagasDisponiveis });
-                contador++;
-            }
-        }
-
-        // Monta string de exibição
-        const proximasVagasStr = proximasVagas
-            .map(v => `${v.data.split("-").reverse().join("/")} (${v.vagas})`)
-            .join(", ");
-
-        document.getElementById("proximas-vagas").textContent =
-            "Próx. vagas: " + proximasVagasStr;
+            document.getElementById("proximas-vagas").textContent =
+                proximasVagas.length > 0
+                    ? "Próx. vagas: " + proximasVagasStr
+                    : "Sem vagas disponíveis";
+        });
     });
 }
-
 /* ---------- Interceptadores para recalcular vagas após loads ---------- */
 /* Substitui os handlers originais para adicionar chamada ao calcularProximasVagas */
 (function wrapLoads() {
