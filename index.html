@@ -1072,11 +1072,13 @@ function setupEventListeners() {
         // rebind listeners for auth events with new auth instance
         initAuth();
         if (auth.currentUser) {
-            loadAgendamentosProximos();
-            loadBlockedDays();
-            loadDiasAjustados();
-            calcularProximasVagas();
-        }
+    loadAgendamentosProximos();
+    loadBlockedDays();
+    loadDiasAjustados().then(() => {
+        calcularProximasVagas();
+    });
+}
+
     });
 
     // menu navigation
@@ -1228,22 +1230,27 @@ function loadOrdensServico() {
 }
 
 function loadDiasAjustados() {
-    database.ref('diasAjustados').on('value', snapshot => {
-        diasAjustados = snapshot.val() || {};
-        // Atualiza a exibição dos dias ajustados
-        const container = document.getElementById('dias-ajustados');
-        container.innerHTML = '';
-        
-        for (const [date, data] of Object.entries(diasAjustados)) {
-            const dayElement = document.createElement('div');
-            dayElement.className = 'blocked-day';
-            dayElement.innerHTML = `<span>${formatDateCorrectly(date)} - ${data.vagas} vaga(s)</span>
-                <i class="bi bi-x-lg delete-ajuste-vagas" data-date="${date}" style="cursor:pointer"></i>`;
-            container.appendChild(dayElement);
-        }
+    return new Promise(resolve => {
+        database.ref('diasAjustados').on('value', snapshot => {
+            diasAjustados = snapshot.val() || {};
 
-        document.querySelectorAll('.delete-ajuste-vagas').forEach(btn => {
-            btn.addEventListener('click', deleteAjusteVagas);
+            // Atualiza a exibição dos dias ajustados
+            const container = document.getElementById('dias-ajustados');
+            container.innerHTML = '';
+
+            for (const [date, data] of Object.entries(diasAjustados)) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'blocked-day';
+                dayElement.innerHTML = `<span>${formatDateCorrectly(date)} - ${data.vagas} vaga(s)</span>
+                    <i class="bi bi-x-lg delete-ajuste-vagas" data-date="${date}" style="cursor:pointer"></i>`;
+                container.appendChild(dayElement);
+            }
+
+            document.querySelectorAll('.delete-ajuste-vagas').forEach(btn => {
+                btn.addEventListener('click', deleteAjusteVagas);
+            });
+
+            resolve(); // 🔹 Garante que só continue depois de carregar tudo
         });
     });
 }
