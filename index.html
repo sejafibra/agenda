@@ -7,6 +7,8 @@
     <link rel="icon" href="https://raw.githubusercontent.com/sejafibra/agenda/refs/heads/main/faviconsf.ico" type="image/x-icon">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
         body {
             background-color: #f8f9fa;
@@ -1450,13 +1452,16 @@ function createAgendamentoCard(agendamento, id) {
                 <div class="text-end ms-3">
                     <div class="d-flex justify-content-end align-items-center mb-1">
                         <div class="action-buttons me-2">
-                            <input type="checkbox" class="form-check-input highlight-checkbox" data-id="${id}" ${isHighlighted ? 'checked' : ''}>
-                            ${convertButton}
-                            <i class="bi bi-arrow-repeat change-date-btn" title="Alterar Data" data-id="${id}"></i>
-                            <i class="bi bi-clipboard copy-btn" title="Copiar para Excel" data-id="${id}"></i>
-                            <i class="bi bi-pencil edit-btn" title="Editar" data-id="${id}"></i>
-                            <i class="bi bi-trash delete-btn" title="Excluir" data-id="${id}"></i>
-                        </div>
+    <input type="checkbox" class="form-check-input highlight-checkbox" data-id="${id}" ${isHighlighted ? 'checked' : ''}>
+    ${convertButton}
+    <!-- Botão Wi-Fi adicionado -->
+    <i class="bi bi-wifi wifi-btn" title="Wi-Fi" data-id="${id}"></i>
+    <i class="bi bi-arrow-repeat change-date-btn" title="Alterar Data" data-id="${id}"></i>
+    <i class="bi bi-clipboard copy-btn" title="Copiar para Excel" data-id="${id}"></i>
+    <i class="bi bi-pencil edit-btn" title="Editar" data-id="${id}"></i>
+    <i class="bi bi-trash delete-btn" title="Excluir" data-id="${id}"></i>
+</div>
+
                         <span class="badge ${badgePeriodoClass}">${agendamento.periodo}</span>
                         ${badgeExtra}
                     </div>
@@ -1472,6 +1477,8 @@ function createAgendamentoCard(agendamento, id) {
     card.querySelector('.change-date-btn')?.addEventListener('click', showChangeDateModal);
     card.querySelector('.highlight-checkbox')?.addEventListener('change', toggleHighlight);
     card.querySelector('.convert-btn')?.addEventListener('click', convertReservaToAgendamento);
+    card.querySelector('.wifi-btn')?.addEventListener('click', () => gerarWiFiCard(agendamento));
+
 
     return card;
 }
@@ -1514,6 +1521,108 @@ document.getElementById('agendamento-tab').click();
         })
         .catch(err => showAlert('Erro ao carregar reserva: ' + err.message, 'danger'));
 }
+
+// ---- helpers para gerar a janela/impressão do Wi-Fi ----
+function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#39;');
+}
+
+/**
+ * gerarWiFiCard(agendamento)
+ * Abre uma nova janela com layout semelhante ao "Index Wi-fi" e já dispara print().
+ * Usa os campos agendamento.nomeWifi e agendamento.senhaWifi.
+ */
+
+function gerarWiFiCard(agendamento) {
+  const ssid = escapeHtml(agendamento.nomeWifi || '');
+  const senha = escapeHtml(agendamento.senhaWifi || '');
+
+  const win = window.open('', '_blank', 'width=420,height=640,scrollbars=yes');
+  if (!win) {
+    showAlert('Bloqueador de pop-ups impediu a abertura da janela de impressão.', 'danger');
+    return;
+  }
+
+  // o HTML é uma única string entre crases: começa logo abaixo e termina antes de win.document.close()
+  win.document.write(`<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wi-Fi — ${ssid}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body {
+    background:#fff;
+    font-family: Arial, Helvetica, sans-serif;
+    margin:0;
+    padding:0;
+    text-align:center;
+  }
+
+  .print-area {
+    width:102mm;
+    height:150mm;
+    margin:0 auto;
+    position:relative;
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+  }
+
+  #qrcode {
+    width:35mm;
+    height:35mm;
+    margin-bottom:10mm;
+  }
+
+  .ssid {
+    font-weight:600;
+    color:#0056b3;
+    font-size:14pt;
+    margin-bottom:4mm;
+  }
+
+  .senha {
+    font-size:13pt;
+    color:#0056b3;
+  }
+
+  @media print {
+    body { margin:0; }
+  }
+</style>
+</head>
+<body>
+  <div class="print-area">
+    <div id="qrcode"></div>
+    <div class="ssid">Rede: ${ssid}</div>
+    <div class="senha">Senha: ${senha}</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+  <script>
+    try {
+      const conteudo = "WIFI:T:WPA;S:${ssid};P:${senha};;";
+      new QRCode(document.getElementById('qrcode'), { text: conteudo, width: 132, height: 132 });
+      setTimeout(() => window.print(), 500);
+    } catch (err) {
+      console.error(err);
+      setTimeout(() => window.print(), 500);
+    }
+  <\/script>
+</body>
+</html>`);
+   // ← esta crase fecha a string
+  win.document.close();
+}
+
 
 
 function toggleHighlight(e) {
