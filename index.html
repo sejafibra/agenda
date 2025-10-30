@@ -1072,13 +1072,11 @@ function setupEventListeners() {
         // rebind listeners for auth events with new auth instance
         initAuth();
         if (auth.currentUser) {
-    loadAgendamentosProximos();
-    loadBlockedDays();
-    loadDiasAjustados().then(() => {
-        calcularProximasVagas();
-    });
-}
-
+            loadAgendamentosProximos();
+            loadBlockedDays();
+            loadDiasAjustados();
+            calcularProximasVagas();
+        }
     });
 
     // menu navigation
@@ -1202,56 +1200,44 @@ function handleReservaSubmit(e) {
 /* ---------- Load & render agendamentos ---------- */
 
 function loadAgendamentos() {
-    database.ref('agendamentos').orderByChild('ordemServico').equalTo(false).on('value', snapshot => {
+    database.ref('agendamentos').on('value', snapshot => {
         const agendamentos = [];
         snapshot.forEach(childSnapshot => {
             const ag = childSnapshot.val();
-            agendamentos.push({
-                id: childSnapshot.key,
-                ...ag
-            });
+            
+            // Inclui tanto agendamentos normais QUANTO reservas
+            // Mas exclui ordens de serviço
+            if (!ag.ordemServico) {
+                agendamentos.push({
+                    id: childSnapshot.key,
+                    ...ag
+                });
+            }
         });
         renderAgendamentos(agendamentos);
-    });
-}
-
-function loadOrdensServico() {
-    database.ref('agendamentos').orderByChild('ordemServico').equalTo(true).on('value', snapshot => {
-        const ordensServico = [];
-        snapshot.forEach(childSnapshot => {
-            const os = childSnapshot.val();
-            ordensServico.push({
-                id: childSnapshot.key,
-                ...os
-            });
-        });
-        renderOrdensServico(ordensServico);
+        calcularProximasVagas();
     });
 }
 
 function loadDiasAjustados() {
-    return new Promise(resolve => {
-        database.ref('diasAjustados').on('value', snapshot => {
-            diasAjustados = snapshot.val() || {};
+    database.ref('diasAjustados').on('value', snapshot => {
+        diasAjustados = snapshot.val() || {};
+        // Atualiza a exibição dos dias ajustados
+        const container = document.getElementById('dias-ajustados');
+        container.innerHTML = '';
+        
+        for (const [date, data] of Object.entries(diasAjustados)) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'blocked-day';
+            dayElement.innerHTML = `<span>${formatDateCorrectly(date)} - ${data.vagas} vaga(s)</span>
+                <i class="bi bi-x-lg delete-ajuste-vagas" data-date="${date}" style="cursor:pointer"></i>`;
+            container.appendChild(dayElement);
+        }
 
-            // Atualiza a exibição dos dias ajustados
-            const container = document.getElementById('dias-ajustados');
-            container.innerHTML = '';
-
-            for (const [date, data] of Object.entries(diasAjustados)) {
-                const dayElement = document.createElement('div');
-                dayElement.className = 'blocked-day';
-                dayElement.innerHTML = `<span>${formatDateCorrectly(date)} - ${data.vagas} vaga(s)</span>
-                    <i class="bi bi-x-lg delete-ajuste-vagas" data-date="${date}" style="cursor:pointer"></i>`;
-                container.appendChild(dayElement);
-            }
-
-            document.querySelectorAll('.delete-ajuste-vagas').forEach(btn => {
-                btn.addEventListener('click', deleteAjusteVagas);
-            });
-
-            resolve(); // 🔹 Garante que só continue depois de carregar tudo
+        document.querySelectorAll('.delete-ajuste-vagas').forEach(btn => {
+            btn.addEventListener('click', deleteAjusteVagas);
         });
+        calcularProximasVagas(); // ← ADICIONE ESTA LINHA
     });
 }
 
@@ -1276,13 +1262,15 @@ function filterAgendamentosByDate() {
             const agendamentos = [];
             snapshot.forEach(childSnapshot => {
                 const ag = childSnapshot.val();
-                if (!ag.ordemServico) { // Filtra apenas agendamentos normais
+                // CORREÇÃO: Inclui reservas também
+                if (!ag.ordemServico) {
                     agendamentos.push({
                         id: childSnapshot.key,
                         ...ag
                     });
                 }
             });
+
             
             if (agendamentos.length === 0) {
                 container.innerHTML = '<p class="text-muted">Nenhum agendamento encontrado.</p>';
@@ -2003,6 +1991,8 @@ function loadBlockedDays() {
         document.querySelectorAll('.delete-blocked-day').forEach(btn => {
             btn.addEventListener('click', deleteBlockedDay);
         });
+        
+        calcularProximasVagas(); // ← ADICIONE ESTA LINHA
     });
 }
 
@@ -2130,18 +2120,26 @@ function resetForm() {
 
 /* ---------- Função calcularProximasVagas() (considera dias ajustados e bloqueados) ---------- */
 function calcularProximasVagas() {
+    console.log("=== INICIANDO CÁLCULO DE VAGAS ===");
     const hoje = new Date().toISOString().split("T")[0];
-    const diasComContagem = {};
+    console.log("Data de hoje:", hoje);
 
     // Primeiro busca agendamentos normais (sem OS)
     database.ref("agendamentos").once("value").then(snapshot => {
+        const diasComContagem = {};
+        let totalAgendamentos = 0;
+
+        console.log("=== ANALISANDO AGENDAMENTOS ===");
         snapshot.forEach(childSnapshot => {
             const agendamento = childSnapshot.val();
             const data = agendamento.data;
             const tipo = agendamento.tipo || "agendamento";
 
             // Ignorar ordens de serviço
-            if (agendamento.ordemServico) return;
+            if (agendamento.ordemServico) {
+                console.log("  Ignorando OS na data:", data);
+                return;
+            }
 
             // Contabiliza apenas agendamentos normais e reservas
             if (tipo === "agendamento" || tipo === "reserva") {
@@ -2149,40 +2147,71 @@ function calcularProximasVagas() {
                     diasComContagem[data] = 0;
                 }
                 diasComContagem[data]++;
+                totalAgendamentos++;
+                console.log(`  Data ${data}: ${diasComContagem[data]} agendamento(s)`);
             }
         });
+        console.log("Total de agendamentos encontrados:", totalAgendamentos);
+        console.log("Dias com agendamentos:", diasComContagem);
 
         // Depois busca dias bloqueados
         database.ref("blockedDays").once("value").then(blockedSnapshot => {
             const diasBloqueados = blockedSnapshot.val() || {};
+            console.log("Dias bloqueados:", Object.keys(diasBloqueados));
+
+            console.log("Dias ajustados:", diasAjustados);
 
             const proximasVagas = [];
-            let contador = 0;
             let dataAtual = new Date(hoje);
+            let diasVerificados = 0;
 
-            while (contador < 3) {
+            console.log("=== PROCURANDO PRÓXIMAS VAGAS ===");
+            
+            // Busca os próximos 30 dias
+            while (diasVerificados < 30 && proximasVagas.length < 3) {
                 dataAtual.setDate(dataAtual.getDate() + 1);
+                diasVerificados++;
                 const dataStr = dataAtual.toISOString().split("T")[0];
 
-                if (isSunday(dataStr)) continue; // pula domingos
-                if (diasBloqueados[dataStr]) continue; // pula dias bloqueados
+                if (isSunday(dataStr)) {
+                    console.log(`  ${dataStr}: Domingo - pulando`);
+                    continue;
+                }
+                
+                if (diasBloqueados[dataStr]) {
+                    console.log(`  ${dataStr}: Dia bloqueado - pulando`);
+                    continue;
+                }
 
                 // Definição de limites
-                let limiteMaximo = isSaturday(dataStr) ? 1 : 3;
-
-                // Se houve ajuste manual de vagas, respeita ele
+                let limiteMaximo;
                 if (diasAjustados[dataStr]?.vagas) {
                     limiteMaximo = diasAjustados[dataStr].vagas;
+                    console.log(`  ${dataStr}: Limite ajustado para ${limiteMaximo} vagas`);
+                } else {
+                    limiteMaximo = isSaturday(dataStr) ? 1 : 3;
+                    console.log(`  ${dataStr}: Limite padrão ${limiteMaximo} (sábado: ${isSaturday(dataStr)})`);
                 }
 
                 const ocupadas = diasComContagem[dataStr] || 0;
                 const vagasDisponiveis = limiteMaximo - ocupadas;
 
+                console.log(`  ${dataStr}: ${ocupadas} ocupadas / ${limiteMaximo} limite = ${vagasDisponiveis} disponíveis`);
+
                 if (vagasDisponiveis > 0) {
-                    proximasVagas.push({ data: dataStr, vagas: vagasDisponiveis });
-                    contador++;
+                    proximasVagas.push({ 
+                        data: dataStr, 
+                        vagas: vagasDisponiveis
+                    });
+                    console.log(`  ✅ ADICIONADO: ${dataStr} (${vagasDisponiveis} vaga(s))`);
+                } else {
+                    console.log(`  ❌ SEM VAGAS: ${dataStr}`);
                 }
             }
+
+            console.log("=== RESULTADO FINAL ===");
+            console.log("Dias encontrados com vagas:", proximasVagas);
+            console.log("Total de dias verificados:", diasVerificados);
 
             // Monta string de exibição
             const proximasVagasStr = proximasVagas
@@ -2193,52 +2222,14 @@ function calcularProximasVagas() {
                 proximasVagas.length > 0
                     ? "Próx. vagas: " + proximasVagasStr
                     : "Sem vagas disponíveis";
+                    
+            console.log("Texto exibido:", "Próx. vagas: " + proximasVagasStr);
         });
+    }).catch(error => {
+        console.error("Erro no cálculo de vagas:", error);
     });
 }
-/* ---------- Interceptadores para recalcular vagas após loads ---------- */
-/* Substitui os handlers originais para adicionar chamada ao calcularProximasVagas */
-(function wrapLoads() {
-    const originalLoadAgendamentos = loadAgendamentos;
-    loadAgendamentos = function() {
-        // registra com on(value) e depois chama cálculo
-        database.ref('agendamentos').on('value', snapshot => {
-            // chama render original via re-obtenção dos dados
-            const agendamentos = [];
-            snapshot.forEach(childSnapshot => {
-                const ag = childSnapshot.val();
-                if (!ag.ordemServico) { // Filtra apenas agendamentos normais
-                    agendamentos.push({ id: childSnapshot.key, ...ag });
-                }
-            });
-            renderAgendamentos(agendamentos);
-            calcularProximasVagas();
-        });
-    };
 
-    const originalLoadBlockedDays = loadBlockedDays;
-    loadBlockedDays = function() {
-        database.ref('blockedDays').on('value', snapshot => {
-            const container = document.getElementById('dias-bloqueados');
-            container.innerHTML = '';
-            snapshot.forEach(childSnapshot => {
-                const date = childSnapshot.key;
-                const reason = childSnapshot.val().reason || '';
-                const dayElement = document.createElement('div');
-                dayElement.className = 'blocked-day';
-                dayElement.innerHTML = `<span>${formatDateCorrectly(date)} ${reason ? ' - ' + reason : ''}</span>
-                    <i class="bi bi-x-lg delete-blocked-day" data-date="${date}" style="cursor:pointer"></i>`;
-                container.appendChild(dayElement);
-            });
-
-            document.querySelectorAll('.delete-blocked-day').forEach(btn => {
-                btn.addEventListener('click', deleteBlockedDay);
-            });
-
-            calcularProximasVagas();
-        });
-    };
-})();
 
 /* ---------- Inicialização final após DOM pronto ---------- */
 document.addEventListener('DOMContentLoaded', function() {
