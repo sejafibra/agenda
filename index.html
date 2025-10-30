@@ -348,6 +348,36 @@
         .card.reserva:hover {
             opacity: 1;
         }
+/* Indicador de validade da reserva */
+.status-reserva {
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 2px 6px;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.status-reserva.no-prazo {
+  background-color: #198754;
+  color: white;
+}
+.status-reserva.atencao {
+  background-color: #ffc107;
+  color: #000;
+}
+.status-reserva.expirada {
+  background-color: #dc3545;
+  color: white;
+}
+
+/* Posicionamento à direita, abaixo de "Agendado por" */
+.status-reserva-container {
+  text-align: right;
+  margin-top: 2px;
+}
+
+
     </style>
 </head>
 <body>
@@ -1405,6 +1435,27 @@ function filterAgendamentosByRoteador() {
         });
 }
 
+/* ---------- Controle de validade de reservas ---------- */
+function getReservaStatus(createdAt) {
+  if (!createdAt) return 'expirada';
+  const now = Date.now();
+  const elapsedHours = (now - createdAt) / (1000 * 60 * 60);
+
+  if (elapsedHours < 20) return 'no-prazo';
+  if (elapsedHours < 24) return 'atencao';
+  return 'expirada';
+}
+
+function getReservaStatusLabel(status) {
+  switch (status) {
+    case 'no-prazo': return 'No Prazo';
+    case 'atencao': return 'Atenção ao Prazo';
+    case 'expirada': return 'Prazo Encerrado';
+    default: return '';
+  }
+}
+
+
 function createAgendamentoCard(agendamento, id) {
     const card = document.createElement('div');
     const dateHash = (agendamento.data || '').split('-').join('');
@@ -1426,6 +1477,12 @@ function createAgendamentoCard(agendamento, id) {
 
     const isHighlighted = agendamento.highlighted || false;
     const isReserva = agendamento.tipo === 'reserva';
+let statusBadge = '';
+if (isReserva && agendamento.createdAt) {
+  const status = getReservaStatus(agendamento.createdAt);
+  const label = getReservaStatusLabel(status);
+  statusBadge = `<div class="status-reserva ${status}">${label}</div>`;
+}
     const convertButton = isReserva ? 
         '<i class="bi bi-gear convert-btn" title="Converter em Agendamento" data-id="'+id+'"></i>' : '';
 
@@ -1443,7 +1500,7 @@ function createAgendamentoCard(agendamento, id) {
                     <h6 class="card-title mb-1">${agendamento.cliente}</h6>
                     <p class="card-text mb-1"><small>Endereço: ${agendamento.endereco}, ${agendamento.numero} ${agendamento.complemento ? ' | ' + agendamento.complemento : ''} | Bairro: <span class="bairro-negrito">${agendamento.bairro}</span></small></p>
                     ${agendamento.observacoes ? `<p class="card-text observacoes mb-1"><small><strong>Obs:</strong> ${agendamento.observacoes}</small></p>` : ''}
-                </div>
+		</div>
                 <div class="text-end ms-3">
                     <div class="d-flex justify-content-end align-items-center mb-1">
                         <div class="action-buttons me-2">
@@ -1461,6 +1518,8 @@ function createAgendamentoCard(agendamento, id) {
                         ${badgeExtra}
                     </div>
                     ${userName ? `<small class="text-muted d-block text-end">Agendado por: ${userName}</small>` : ''}
+                    ${statusBadge ? `<div class="status-reserva-container">${statusBadge}</div>` : ''}
+
                 </div>
             </div>
         </div>
