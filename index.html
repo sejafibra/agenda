@@ -1791,21 +1791,27 @@ function renderAgendamentos(agendamentos) {
         console.error("Elemento 'agendamentos-container' não encontrado");
         return;
     }
-    
+
     container.innerHTML = '';
-    
+
     if (!agendamentos || agendamentos.length === 0) {
         container.innerHTML = '<p class="text-muted">Nenhum agendamento encontrado.</p>';
         return;
     }
 
+    // 🔹 Numeração GLOBAL dos "Encaixe" (antes de agrupar por data)
+    const todosEncaixes = (agendamentos || [])
+        .filter(a => a && a.periodo && a.periodo.toLowerCase() === 'encaixe')
+        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); // ordem de criação
+
+    todosEncaixes.forEach((ag, index) => {
+        if (ag) ag.periodoExibicao = `Encaixe (${index + 1}º)`;
+    });
+
     // Agrupa por data
     const agendamentosPorData = agendamentos.reduce((acc, ag) => {
-        if (!ag.data) return acc;  // Tratamento para dados sem data
-        
-        if (!acc[ag.data]) {
-            acc[ag.data] = [];
-        }
+        if (!ag || !ag.data) return acc;
+        if (!acc[ag.data]) acc[ag.data] = [];
         acc[ag.data].push(ag);
         return acc;
     }, {});
@@ -1813,21 +1819,15 @@ function renderAgendamentos(agendamentos) {
     // Ordena as datas
     const sortedDates = Object.keys(agendamentosPorData).sort();
 
-    // Renderiza para cada data
+    // Renderiza cada data e seus cards
     sortedDates.forEach(data => {
         const ags = agendamentosPorData[data];
         if (!ags || ags.length === 0) return;
 
-        // 🔹 Identifica e numera os agendamentos "Encaixe"
-        const encaixes = ags.filter(a => a.periodo && a.periodo.toLowerCase() === 'encaixe');
-        encaixes.forEach((ag, index) => {
-            ag.periodoExibicao = `Encaixe (${index + 1}º) `;
-        });
-
-        // 🔹 Cabeçalho da data
+        // Cabeçalho da data
         const dateHeader = document.createElement('div');
         dateHeader.className = 'd-flex justify-content-between align-items-center mb-3';
-        
+
         try {
             const dataFormatada = formatDateCorrectly(data);
             dateHeader.innerHTML = `
@@ -1837,25 +1837,22 @@ function renderAgendamentos(agendamentos) {
                 </span>
             `;
             container.appendChild(dateHeader);
-            
-            // 🔹 Criação dos cards
-            ags.forEach(ag => {
-                if (ag) {
-                    // Exibe "1º Encaixe", "2º Encaixe", etc. quando aplicável
-                    const displayPeriodo = ag.periodoExibicao || ag.periodo;
-                    const agParaExibir = { ...ag, periodo: displayPeriodo };
 
-                    const card = createAgendamentoCard(agParaExibir, ag.id);
-                    if (card) {
-                        container.appendChild(card);
-                    }
-                }
+            // Criação dos cards para a data
+            ags.forEach(ag => {
+                if (!ag) return;
+                const displayPeriodo = ag.periodoExibicao || ag.periodo;
+                const agParaExibir = { ...ag, periodo: displayPeriodo };
+                const card = createAgendamentoCard(agParaExibir, ag.id);
+                if (card) container.appendChild(card);
             });
         } catch (error) {
             console.error("Erro ao renderizar agendamentos para data:", data, error);
         }
     });
 }
+
+
 function renderOrdensServico(ordensServico) {
     const container = document.getElementById('ordens-servico-container');
     container.innerHTML = '';
