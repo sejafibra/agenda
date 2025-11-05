@@ -1802,14 +1802,16 @@ function renderAgendamentos(agendamentos) {
         return;
     }
 
-    // 🔹 Numeração GLOBAL dos "Encaixe" (antes de agrupar por data)
-    const todosEncaixes = (agendamentos || [])
-        .filter(a => a && a.periodo && a.periodo.toLowerCase() === 'encaixe')
-        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); // ordem de criação
+// 🔹 Numeração GLOBAL dos "Encaixe" (ordem real de criação no Firebase)
+const todosEncaixes = (agendamentos || [])
+    .filter(a => a && a.periodo && a.periodo.toLowerCase().includes('encaixe'))
+    // Ordena pela chave gerada pelo Firebase (garante ordem real de criação)
+    .sort((a, b) => (a.id > b.id ? 1 : -1));
 
-    todosEncaixes.forEach((ag, index) => {
-        if (ag) ag.periodoExibicao = `Encaixe (${index + 1}º)`;
-    });
+todosEncaixes.forEach((ag, index) => {
+    if (ag) ag.periodoExibicao = `Encaixe (${index + 1}º)`;
+});
+
 
     // Agrupa por data
     const agendamentosPorData = agendamentos.reduce((acc, ag) => {
