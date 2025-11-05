@@ -1507,7 +1507,10 @@ function createAgendamentoCard(agendamento, id) {
     const colorIndex = (parseInt(dateHash || '0') % 6) + 1;
     const colorClass = `color-dia-${colorIndex}`;
 
-    const badgePeriodoClass = agendamento.periodo === 'Encaixe' ? 'badge-encaixe' : 'bg-primary';
+    const badgePeriodoClass = 
+    agendamento.periodo && agendamento.periodo.toLowerCase().includes('encaixe')
+        ? 'badge-encaixe'
+        : 'bg-primary';
     let badgeExtra = '';
     if (agendamento.tipo === 'reserva') {
     badgeExtra += '<span class="badge badge-reserva ms-1">Reserva</span>';
