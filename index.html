@@ -1369,6 +1369,39 @@ function filterOrdensServicoByDate() {
         });
 }
 
+function loadOrdensServico() {
+    const container = document.getElementById('ordens-servico-container');
+    container.innerHTML = '<p class="text-muted">Carregando ordens de serviço...</p>';
+
+    database.ref('agendamentos').once('value')
+        .then(snapshot => {
+            container.innerHTML = '';
+            if (!snapshot.exists()) {
+                container.innerHTML = '<p class="text-muted">Nenhuma ordem de serviço encontrada.</p>';
+                return;
+            }
+
+            const ordensServico = [];
+            snapshot.forEach(childSnapshot => {
+                const os = childSnapshot.val();
+                if (os.ordemServico) { // só adiciona se for OS
+                    ordensServico.push({
+                        id: childSnapshot.key,
+                        ...os
+                    });
+                }
+            });
+
+            // usa a função existente para exibir
+            renderOrdensServico(ordensServico);
+        })
+        .catch(err => {
+            console.error('Erro ao carregar ordens de serviço:', err);
+            container.innerHTML = '<p class="text-danger">Erro ao carregar ordens de serviço.</p>';
+        });
+}
+	
+	
 function filterAgendamentosByRoteador() {
     const filterValue = document.getElementById('filter-roteador').value;
     const container = document.getElementById('agendamentos-container');
