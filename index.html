@@ -421,15 +421,13 @@
                     </div>
                     <div class="d-flex flex-column align-items-center">
                         <div id="user-info" class="mb-1"></div>
-                        <div id="proximas-vagas"></div>
-			<div id="dias-com-reservas" style="font-size: 0.85rem; color: #dc3545; font-weight: 500; margin-top: -5px;"></div>
-			<div id="aviso-ordens-servico" style="font-size: 0.85rem; color: #0d47a1; font-weight: 500; margin-top: -5px;"></div>
+<div id="proximas-vagas"></div>
+<div id="dias-com-reservas" style="font-size: 0.85rem; color: #0d47a1; font-weight: 500; margin-top: -5px;"></div>
+<div id="aviso-ordens-servico" style="font-size: 0.85rem; color: #dc3545; font-weight: 500; margin-top: 5px; margin-bottom: 8px;"></div>
+<button id="logout-btn" class="btn btn-sm btn-outline-danger">
+    <i class="bi bi-box-arrow-right"></i> Sair
+</button>
 
-
-
-                        <button id="logout-btn" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-box-arrow-right"></i> Sair
-                        </button>
                     </div>
                 </div>
             </div>
@@ -2420,7 +2418,7 @@ function verificarOrdensDeServico() {
             });
 
             if (temOS) {
-                container.textContent = 'Há ordens de serviço agendadas.';
+                container.textContent = 'Atenção: Há ordens de serviço agendadas!';
             } else {
                 container.textContent = '';
             }
