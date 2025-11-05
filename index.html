@@ -1803,7 +1803,7 @@ function renderAgendamentos(agendamentos) {
 
     // Agrupa por data
     const agendamentosPorData = agendamentos.reduce((acc, ag) => {
-        if (!ag.data) return acc;  // Adicionado tratamento para dados sem data
+        if (!ag.data) return acc;  // Tratamento para dados sem data
         
         if (!acc[ag.data]) {
             acc[ag.data] = [];
@@ -1818,8 +1818,15 @@ function renderAgendamentos(agendamentos) {
     // Renderiza para cada data
     sortedDates.forEach(data => {
         const ags = agendamentosPorData[data];
-        if (!ags || ags.length === 0) return;  // Adicionado verificação de segurança
-        
+        if (!ags || ags.length === 0) return;
+
+        // 🔹 Identifica e numera os agendamentos "Encaixe"
+        const encaixes = ags.filter(a => a.periodo && a.periodo.toLowerCase() === 'encaixe');
+        encaixes.forEach((ag, index) => {
+            ag.periodoExibicao = `Encaixe (${index + 1}º) `;
+        });
+
+        // 🔹 Cabeçalho da data
         const dateHeader = document.createElement('div');
         dateHeader.className = 'd-flex justify-content-between align-items-center mb-3';
         
@@ -1833,9 +1840,14 @@ function renderAgendamentos(agendamentos) {
             `;
             container.appendChild(dateHeader);
             
+            // 🔹 Criação dos cards
             ags.forEach(ag => {
-                if (ag) {  // Verificação adicional
-                    const card = createAgendamentoCard(ag, ag.id);
+                if (ag) {
+                    // Exibe "1º Encaixe", "2º Encaixe", etc. quando aplicável
+                    const displayPeriodo = ag.periodoExibicao || ag.periodo;
+                    const agParaExibir = { ...ag, periodo: displayPeriodo };
+
+                    const card = createAgendamentoCard(agParaExibir, ag.id);
                     if (card) {
                         container.appendChild(card);
                     }
@@ -1846,7 +1858,6 @@ function renderAgendamentos(agendamentos) {
         }
     });
 }
-
 function renderOrdensServico(ordensServico) {
     const container = document.getElementById('ordens-servico-container');
     container.innerHTML = '';
