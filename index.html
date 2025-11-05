@@ -422,6 +422,11 @@
                     <div class="d-flex flex-column align-items-center">
                         <div id="user-info" class="mb-1"></div>
                         <div id="proximas-vagas"></div>
+			<div id="dias-com-reservas" style="font-size: 0.85rem; color: #dc3545; font-weight: 500; margin-top: -5px;"></div>
+			<div id="aviso-ordens-servico" style="font-size: 0.85rem; color: #0d47a1; font-weight: 500; margin-top: -5px;"></div>
+
+
+
                         <button id="logout-btn" class="btn btn-sm btn-outline-danger">
                             <i class="bi bi-box-arrow-right"></i> Sair
                         </button>
@@ -1106,6 +1111,9 @@ function setupEventListeners() {
             loadBlockedDays();
             loadDiasAjustados();
             calcularProximasVagas();
+	    calcularDiasComReservas();
+	    verificarOrdensDeServico();
+
         }
     });
 
@@ -1133,6 +1141,9 @@ function handleLogin(email, password) {
             loadBlockedDays();
             loadDiasAjustados();
             calcularProximasVagas();
+	    calcularDiasComReservas();
+	    verificarOrdensDeServico();
+
         })
         .catch(error => {
             console.error("Erro no login:", error);
@@ -1268,6 +1279,9 @@ function loadDiasAjustados() {
             btn.addEventListener('click', deleteAjusteVagas);
         });
         calcularProximasVagas(); // ← ADICIONE ESTA LINHA
+	calcularDiasComReservas();
+        verificarOrdensDeServico();
+
     });
 }
 
@@ -1400,8 +1414,8 @@ function loadOrdensServico() {
             container.innerHTML = '<p class="text-danger">Erro ao carregar ordens de serviço.</p>';
         });
 }
-	
-	
+
+
 function filterAgendamentosByRoteador() {
     const filterValue = document.getElementById('filter-roteador').value;
     const container = document.getElementById('agendamentos-container');
@@ -2320,6 +2334,90 @@ function calcularProximasVagas() {
     }).catch(error => {
         console.error("Erro no cálculo de vagas:", error);
     });
+}
+
+// ---------- NOVA FUNÇÃO: calcularDiasComReservas ----------
+function calcularDiasComReservas() {
+    const container = document.getElementById('dias-com-reservas');
+    if (!container) return;
+
+    container.textContent = 'Carregando dias com reservas...';
+
+    database.ref('agendamentos').once('value')
+        .then(snapshot => {
+            if (!snapshot.exists()) {
+                container.textContent = 'Nenhuma reserva encontrada.';
+                return;
+            }
+
+            const reservasPorDia = {};
+
+            snapshot.forEach(childSnapshot => {
+                const item = childSnapshot.val();
+                if (item.tipo === 'reserva') {
+                    const data = item.data;
+                    if (data) {
+                        reservasPorDia[data] = (reservasPorDia[data] || 0) + 1;
+                    }
+                }
+            });
+
+            const dias = Object.keys(reservasPorDia).sort();
+            if (dias.length === 0) {
+                container.textContent = 'Nenhuma reserva cadastrada.';
+                return;
+            }
+
+            // Monta a lista formatada em linha
+let html = '<strong>Dias com Reservas:</strong> ';
+const lista = dias.map(data => {
+    const partes = data.split('-');
+    const dataFormatada = `${partes[2]}/${partes[1]}/${partes[0]}`;
+    return `${dataFormatada} (${reservasPorDia[data]} reserva${reservasPorDia[data] > 1 ? 's' : ''})`;
+});
+html += lista.join(', ');
+container.innerHTML = html;
+
+        })
+        .catch(err => {
+            console.error('Erro ao calcular dias com reservas:', err);
+            container.textContent = 'Erro ao carregar reservas.';
+        });
+}
+
+// ---------- NOVA FUNÇÃO: verificarOrdensDeServico ----------
+function verificarOrdensDeServico() {
+    const container = document.getElementById('aviso-ordens-servico');
+    if (!container) return;
+
+    container.textContent = ''; // limpa o conteúdo
+
+    database.ref('agendamentos').once('value')
+        .then(snapshot => {
+            if (!snapshot.exists()) {
+                container.textContent = '';
+                return;
+            }
+
+            let temOS = false;
+
+            snapshot.forEach(childSnapshot => {
+                const item = childSnapshot.val();
+                if (item.ordemServico) {
+                    temOS = true;
+                }
+            });
+
+            if (temOS) {
+                container.textContent = 'Há ordens de serviço agendadas.';
+            } else {
+                container.textContent = '';
+            }
+        })
+        .catch(err => {
+            console.error('Erro ao verificar ordens de serviço:', err);
+            container.textContent = '';
+        });
 }
 
 
