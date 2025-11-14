@@ -1649,7 +1649,6 @@ function gerarWiFiCard(agendamento) {
     return;
   }
 
-  // o HTML é uma única string entre crases: começa logo abaixo e termina antes de win.document.close()
   win.document.write(`<!doctype html>
 <html lang="pt-BR">
 <head>
@@ -1669,8 +1668,11 @@ function gerarWiFiCard(agendamento) {
   .print-area {
     width:102mm;
     height:150mm;
-    margin:0 auto;
-    position:relative;
+    position:absolute;
+    top:0;
+    left:0;
+    margin:0;
+    padding:0;
     background:#fff;
     display:flex;
     flex-direction:column;
@@ -1696,8 +1698,23 @@ function gerarWiFiCard(agendamento) {
     color:#0056b3;
   }
 
+  /* Correção da margem de impressão */
   @media print {
-    body { margin:0; }
+    @page {
+      margin: 0;
+    }
+
+    body {
+      margin:0;
+      padding:0;
+    }
+
+    .print-area {
+      top:0;
+      left:0;
+      margin:0;
+      padding:0;
+    }
   }
 </style>
 </head>
@@ -1721,11 +1738,9 @@ function gerarWiFiCard(agendamento) {
   <\/script>
 </body>
 </html>`);
-   // ← esta crase fecha a string
+
   win.document.close();
 }
-
-
 
 function toggleHighlight(e) {
     const id = e.target.getAttribute('data-id');
