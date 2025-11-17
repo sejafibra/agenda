@@ -1643,7 +1643,7 @@ function gerarWiFiCard(agendamento) {
   const ssid = escapeHtml(agendamento.nomeWifi || '');
   const senha = escapeHtml(agendamento.senhaWifi || '');
 
-  const win = window.open('', '_blank', 'width=420,height=640,scrollbars=no');
+  const win = window.open('', '_blank', 'width=420,height=640,scrollbars=yes');
   if (!win) {
     showAlert('Bloqueador de pop-ups impediu a abertura da janela de impressão.', 'danger');
     return;
@@ -1655,66 +1655,69 @@ function gerarWiFiCard(agendamento) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wi-Fi — ${ssid}</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-  @page { size: 100mm 150mm; margin: 0; }
-
   body {
-    margin: 0;
-    padding: 0;
-    width: 100mm;
-    height: 150mm;
-    position: relative;
-    font-family: Arial, sans-serif;
+    background:#fff;
+    font-family: Arial, Helvetica, sans-serif;
+    margin:0;
+    padding:0;
+    text-align:center;
   }
 
-  /* QR Code */
+  .print-area {
+    width:102mm;
+    height:150mm;
+    margin:0 auto;
+    position:relative;
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+  }
+
   #qrcode {
-    position: absolute;
-    top: 38.5mm;   /* 3,85 cm */
-    left: 50%;
-    width: 35mm;   /* tamanho real do QR */
-    height: 35mm;
-    transform: translateX(-50%);
+    width:35mm;
+    height:35mm;
+    margin-bottom:10mm;
   }
 
-  /* Texto Rede */
   .ssid {
-    position: absolute;
-    top: 84.4mm; /* 8,44 cm */
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 14pt;
-    font-weight: bold;
-    color: #0056b3;
-    text-align: center;
-    width: 100%;
+    font-weight:600;
+    color:#0056b3;
+    font-size:14pt;
+    margin-bottom:4mm;
   }
 
-  /* Texto Senha */
   .senha {
-    position: absolute;
-    top: 97.3mm; /* 9,73 cm */
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 13pt;
-    color: #0056b3;
-    text-align: center;
-    width: 100%;
+    font-size:13pt;
+    color:#0056b3;
+  }
+
+  @media print {
+    @page { margin: 0; }   /* 👈 único ajuste necessário */
+    body { margin:0; }
   }
 </style>
 </head>
-
 <body>
-  <div id="qrcode"></div>
-  <div class="ssid">Rede: ${ssid}</div>
-  <div class="senha">Senha: ${senha}</div>
+  <div class="print-area">
+    <div id="qrcode"></div>
+    <div class="ssid">Rede: ${ssid}</div>
+    <div class="senha">Senha: ${senha}</div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
   <script>
-    const conteudo = "WIFI:T:WPA;S:${ssid};P:${senha};;";
-    new QRCode(document.getElementById('qrcode'), { text: conteudo, width: 132, height: 132 });
-
-    setTimeout(() => window.print(), 500);
+    try {
+      const conteudo = "WIFI:T:WPA;S:${ssid};P:${senha};;";
+      new QRCode(document.getElementById('qrcode'), { text: conteudo, width: 132, height: 132 });
+      setTimeout(() => window.print(), 500);
+    } catch (err) {
+      console.error(err);
+      setTimeout(() => window.print(), 500);
+    }
   <\/script>
 </body>
 </html>`);
