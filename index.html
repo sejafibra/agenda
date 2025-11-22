@@ -1561,8 +1561,11 @@ const wifiColor = agendamento.aluguel ? 'color: #FF0000;' : 'color: gray;';
                         <div class="action-buttons me-2">
     <input type="checkbox" class="form-check-input highlight-checkbox" data-id="${id}" ${isHighlighted ? 'checked' : ''}>
     ${convertButton}
-    <!-- Botão Wi-Fi adicionado -->
-    <i class="bi bi-wifi wifi-btn" title="Wi-Fi" data-id="${id}" style="${wifiColor}"></i>
+${agendamento.aluguel 
+    ? `<i class="bi bi-wifi wifi-btn" title="Wi-Fi" data-id="${id}" style="${wifiColor}"></i>`
+    : ''
+}
+
     <i class="bi bi-arrow-repeat change-date-btn" title="Alterar Data" data-id="${id}"></i>
     <i class="bi bi-clipboard copy-btn" title="Copiar para Excel" data-id="${id}"></i>
     <i class="bi bi-pencil edit-btn" title="Editar" data-id="${id}"></i>
